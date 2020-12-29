@@ -1,6 +1,6 @@
-import {EditorState, EditorSelection, StateCommand, Extension} from "@codemirror/next/state"
-import {indentMore, indentLess, indentSelection, insertNewlineAndIndent, deleteTrailingWhitespace} from "@codemirror/next/commands"
-import {javascriptLanguage} from "@codemirror/next/lang-javascript"
+import {EditorState, EditorSelection, StateCommand, Extension} from "@codemirror/state"
+import {indentMore, indentLess, indentSelection, insertNewlineAndIndent, deleteTrailingWhitespace} from "@codemirror/commands"
+import {javascriptLanguage} from "@codemirror/lang-javascript"
 import ist from "ist"
 
 function mkState(doc: string, extensions: Extension = []) {
