@@ -1,7 +1,7 @@
 import ist from "ist"
-import {SelectionRange, EditorState, EditorSelection, Extension, StateCommand} from "@codemirror/next/state"
-import {toggleLineComment, CommentTokens, toggleBlockComment} from "@codemirror/next/comment"
-import {htmlLanguage} from "@codemirror/next/lang-html"
+import {SelectionRange, EditorState, EditorSelection, Extension, StateCommand} from "@codemirror/state"
+import {toggleLineComment, CommentTokens, toggleBlockComment} from "@codemirror/comment"
+import {htmlLanguage} from "@codemirror/lang-html"
 
 describe("comment", () => {
   const defaultConfig: CommentTokens = {line: "//", block: {open: "/*", close: "*/"}}

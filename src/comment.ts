@@ -1,6 +1,6 @@
-import {Text, Line} from "@codemirror/next/text"
-import {EditorState, TransactionSpec, EditorSelection, StateCommand} from "@codemirror/next/state"
-import {KeyBinding} from "@codemirror/next/view"
+import {Text, Line} from "@codemirror/text"
+import {EditorState, TransactionSpec, EditorSelection, StateCommand} from "@codemirror/state"
+import {KeyBinding} from "@codemirror/view"
 
 /// An object of this type can be provided as [language
 /// data](#state.EditorState.languageDataAt) under a `"commentTokens"`
