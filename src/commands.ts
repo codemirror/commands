@@ -263,7 +263,7 @@ export const selectAll: StateCommand = ({state, dispatch}) => {
 /// Expand the selection to cover entire lines.
 export const selectLine: StateCommand = ({state, dispatch}) => {
   let ranges = selectedLineBlocks(state).map(({from, to}) => EditorSelection.range(from, Math.min(to + 1, state.doc.length)))
-  dispatch(state.update({selection: new EditorSelection(ranges), annotations: Transaction.userEvent.of("keyboardselection")}))
+  dispatch(state.update({selection: EditorSelection.create(ranges), annotations: Transaction.userEvent.of("keyboardselection")}))
   return true
 }
 
@@ -289,8 +289,8 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
 /// non-empty, convert it to a cursor selection.
 export const simplifySelection: StateCommand = ({state, dispatch}) => {
   let cur = state.selection, selection = null
-  if (cur.ranges.length > 1) selection = new EditorSelection([cur.main])
-  else if (!cur.main.empty) selection = new EditorSelection([EditorSelection.cursor(cur.main.head)])
+  if (cur.ranges.length > 1) selection = EditorSelection.create([cur.main])
+  else if (!cur.main.empty) selection = EditorSelection.create([EditorSelection.cursor(cur.main.head)])
   if (!selection) return false
   dispatch(setSel(state, selection))
   return true
