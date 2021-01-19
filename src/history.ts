@@ -59,8 +59,8 @@ const historyField = StateField.define({
     if (isolate == "full" || isolate == "before") state = state.isolate()
 
     if (tr.annotation(Transaction.addToHistory) === false)
-      return tr.changes.length ? state.addMapping(tr.changes.desc) : state
-    
+      return !tr.changes.empty ? state.addMapping(tr.changes.desc) : state
+
     let event = HistEvent.fromTransaction(tr)
     let time = tr.annotation(Transaction.time)!, userEvent = tr.annotation(Transaction.userEvent)
     if (event)
