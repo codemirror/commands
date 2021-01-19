@@ -271,7 +271,7 @@ class HistoryState {
     if (lastEvent && lastEvent.changes &&
         time - this.prevTime < newGroupDelay &&
         !lastEvent.selectionsAfter.length &&
-        lastEvent.changes.length && event.changes &&
+        !lastEvent.changes.empty && event.changes &&
         isAdjacent(lastEvent.changes, event.changes)) {
       done = updateBranch(done, done.length - 1, maxLen,
                           new HistEvent(event.changes.compose(lastEvent.changes), conc(event.effects, lastEvent.effects),
