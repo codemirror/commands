@@ -597,6 +597,15 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
   return true
 }
 
+/// Insert a tab character at the cursor or, if something is selected,
+/// use [`indentMore`](#commands.indentMore) to indent the entire
+/// selection.
+export const insertTab: StateCommand = ({state, dispatch}) => {
+  if (state.selection.ranges.some(r => !r.empty)) return indentMore({state, dispatch})
+  dispatch(state.update(state.replaceSelection("\t"), {scrollIntoView: true, annotations: Transaction.userEvent.of("input")}))
+  return true
+}
+
 /// Array of key bindings containing the Emacs-style bindings that are
 /// available on macOS by default.
 ///
@@ -753,3 +762,10 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Shift-Mod-\\", run: cursorMatchingBracket}
 ] as readonly KeyBinding[]).concat(standardKeymap)
+
+/// A binding that binds Tab to [`insertTab`](#commands.insertTab) and
+/// Shift-Tab to [`indentSelection`](#commands.indentSelection).
+/// Please see the [Tab example](../../examples/tab/) before using
+/// this.
+export const defaultTabBinding: KeyBinding =
+  {key: "Tab", run: insertTab, shift: indentSelection}

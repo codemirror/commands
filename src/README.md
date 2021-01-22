@@ -9,6 +9,8 @@ with key bindings for a lot of them.
 
 @emacsStyleKeymap
 
+@defaultTabBinding
+
 ### Selection
 
 @simplifySelection
@@ -154,6 +156,8 @@ with key bindings for a lot of them.
 @indentMore
 
 @indentLess
+
+@insertTab
 
 ### Character manipulation
 
