@@ -117,6 +117,9 @@ describe("commands", () => {
 
     it("can explode brackets with whitespace", () =>
        test("foo( | )", "foo(\n  |\n)"))
+
+    it("doesn't try to explode already-exploded brackets", () =>
+       test("foo(\n  |\n)", "foo(\n\n  |\n)"))
   })
 
   describe("deleteTrailingWhitespace", () => {
