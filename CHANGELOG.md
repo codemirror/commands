@@ -1,3 +1,9 @@
+## 0.17.3 (2021-02-16)
+
+### Bug fixes
+
+Fix an issue where `insertNewlineAndIndent` behaved strangely with the cursor between brackets that sat on different lines.
+
 ## 0.17.2 (2021-01-22)
 
 ### New features
