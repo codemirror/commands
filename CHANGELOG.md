@@ -1,3 +1,9 @@
+## 0.17.4 (2021-02-18)
+
+### Bug fixes
+
+Fix a bug where `deleteToLineEnd` would delete the rest of the document when at the end of a line.
+
 ## 0.17.3 (2021-02-16)
 
 ### Bug fixes
