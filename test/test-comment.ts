@@ -79,16 +79,16 @@ describe("comment", () => {
 
         check(`\nline 1\n|${k}\nline 3\n`,
               `\nline 1\n|\nline 3\n`,
-              `\nline 1\n|${k} \nline 3\n`)
+              `\nline 1\n${k} |\nline 3\n`)
 
         check(`\nline 1\n line 2\nline 3\n|${k}`,
               `\nline 1\n line 2\nline 3\n|`,
-              `\nline 1\n line 2\nline 3\n|${k} `)
+              `\nline 1\n line 2\nline 3\n${k} |`)
       })
 
       it("toggles comments in a single line when the cursor is at the beginning", () => {
         check(`line 1\n  |line 2\nline 3\n`,
-              `line 1\n  |${k} line 2\nline 3\n`)
+              `line 1\n  ${k} |line 2\nline 3\n`)
       })
 
       it("toggles comments in a single line selection", () => {
@@ -103,7 +103,8 @@ describe("comment", () => {
               `\n  ${k} lin|e 1\n  ${k}  line 2\n  ${k} line |3\n`)
 
         check(`\n  ${k}lin|e 1\n  ${k}  line 2\n   line 3\n  ${k} li|ne 4\n`,
-              `\n  ${k} ${k}lin|e 1\n  ${k} ${k}  line 2\n  ${k}  line 3\n  ${k} ${k} li|ne 4\n`)
+              `\n  lin|e 1\n   line 2\n   line 3\n  li|ne 4\n`,
+              `\n  ${k} lin|e 1\n  ${k}  line 2\n  ${k}  line 3\n  ${k} li|ne 4\n`)
 
         check(`\n  ${k} lin|e 1\n\n  ${k} line |3\n`,
               `\n  lin|e 1\n\n  line |3\n`)
@@ -121,6 +122,11 @@ describe("comment", () => {
       it("toggles comments in a multi-line multi-range selection", () => {
         check(`\n  lin|e 1\n  line |2\n  line 3\n  l|ine 4\n  line| 5\n`,
               `\n  ${k} lin|e 1\n  ${k} line |2\n  line 3\n  ${k} l|ine 4\n  ${k} line| 5\n`)
+      })
+
+      it("can handle multiple selections on one line", () => {
+        check(`|line| |with| |ranges|`,
+              `${k} |line| |with| |ranges|`)
       })
     })
   }

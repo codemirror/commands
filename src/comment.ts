@@ -1,4 +1,4 @@
-import {Text, Line} from "@codemirror/text"
+import {Line} from "@codemirror/text"
 import {EditorState, TransactionSpec, EditorSelection, StateCommand} from "@codemirror/state"
 import {KeyBinding} from "@codemirror/view"
 
@@ -147,72 +147,48 @@ function changeBlockComment(
   return null
 }
 
-type LineRange = {
-  minCol: number,
-  commented: boolean,
-  skipped: {[id: number]: boolean}
-}
-
-function findLineComment(token: string, lines: readonly Line[]): LineRange {
-  let minCol = 1e9, commented = null, skipped: {[id: number]: boolean} = []
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i], col = /^\s*/.exec(line.text)![0].length
-    let empty = skipped[line.number] = col == line.length
-    if (col < minCol && (!empty || minCol == 1e9 && i == lines.length - 1))
-      minCol = col
-    if (commented != false && (!empty || commented == null && i == lines.length - 1))
-      commented = line.text.slice(col, col + token.length) == token
-  }
-  return {minCol, commented: commented!, skipped}
-}
-
 // Performs toggle, comment and uncomment of line comments.
 function changeLineComment(
   option: CommentOption,
   ranges: readonly {readonly from: number, readonly to: number}[],
   state: EditorState
-) {
-  let lines: Line[][] = [], tokens: string[] = [], lineRanges: LineRange[] = []
+): TransactionSpec | null {
+  let lines: {line: Line, token: string, comment: number, indent: number, single: boolean}[] = []
+  let prevLine = -1
   for (let {from, to} of ranges) {
-    let token = getConfig(state, from).line
-    if (!token) return null
-    tokens.push(token)
-    let lns = getLinesInRange(state.doc, from, to)
-    lines.push(lns)
-    lineRanges.push(findLineComment(token, lns))
+    let startI = lines.length, minIndent = 1e9
+    for (let pos = from; pos <= to;) {
+      let line = state.doc.lineAt(pos)
+      if (line.from > prevLine) {
+        prevLine = line.from
+        let token = getConfig(state, pos).line
+        if (!token) continue
+        let indent = /^\s*/.exec(line.text)![0].length
+        let comment = line.text.slice(indent, indent + token.length) == token ? indent : -1
+        if (indent < line.text.length && indent < minIndent) minIndent = indent
+        lines.push({line, comment, token, indent, single: false})
+      }
+      pos = line.to + 1
+    }
+    if (minIndent < 1e9) for (let i = startI; i < lines.length; i++)
+      if (lines[i].indent < lines[i].line.text.length) lines[i].indent = minIndent
+    if (lines.length == startI + 1) lines[startI].single = true
   }
-  if (option != CommentOption.Uncomment && lineRanges.some(c => !c.commented)) {
+
+  if (option != CommentOption.Comment && lines.some(l => l.comment >= 0)) {
     let changes = []
-    for (let i = 0, lineRange; i < ranges.length; i++) if (!(lineRange = lineRanges[i]).commented) {
-      for (let line of lines[i]) {
-        if (!lineRange.skipped[line.number] || lines[i].length == 1)
-          changes.push({from: line.from + lineRange.minCol, insert: tokens[i] + " "})
-      }
+    for (let {line, comment, token} of lines) if (comment >= 0) {
+      let from = line.from + comment, to = from + token.length
+      if (line.text[to - line.from] == " ") to++
+      changes.push({from, to})
     }
     return {changes}
-  } else if (option != CommentOption.Comment && lineRanges.some(c => c.commented)) {
+  } else if (option != CommentOption.Uncomment && lines.some(l => l.comment < 0)) {
     let changes = []
-    for (let i = 0, lineRange; i < ranges.length; i++) if ((lineRange = lineRanges[i]).commented) {
-      let token = tokens[i]
-      for (let line of lines[i]) {
-        if (lineRange.skipped[line.number] && lines[i].length > 1) continue
-        let pos = line.from + lineRange.minCol
-        let posAfter = lineRange.minCol + token.length
-        let marginLen = line.text.slice(posAfter, posAfter + 1) == " " ? 1 : 0
-        changes.push({from: pos, to: pos + token.length + marginLen})
-      }
-    }
-    return {changes}
+    for (let {line, comment, token, indent, single} of lines) if (comment != indent && (single || /\S/.test(line.text)))
+      changes.push({from: line.from + indent, insert: token + " "})
+    let changeSet = state.changes(changes)
+    return {changes: changeSet, selection: state.selection.map(changeSet, 1)}
   }
   return null
-}
-
-function getLinesInRange(doc: Text, from: number, to: number): Line[] {
-  let line: Line = doc.lineAt(from), lines = []
-  while (line.to < to || (line.from <= to && to <= line.to)) {
-    lines.push(line)
-    if (line.number == doc.lines) break
-    line = doc.line(line.number + 1)
-  }
-  return lines
 }
