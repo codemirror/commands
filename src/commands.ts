@@ -380,7 +380,7 @@ export const deleteGroupForward: Command = view => deleteByGroup(view, true)
 export const deleteToLineEnd: Command = view => deleteBy(view, pos => {
   let lineEnd = view.visualLineAt(pos).to
   if (pos < lineEnd) return lineEnd
-  return Math.max(view.state.doc.length, pos + 1)
+  return Math.min(view.state.doc.length, pos + 1)
 })
 
 /// Delete all whitespace directly before a line end from the
