@@ -733,7 +733,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Shift-Alt-ArrowUp: [`copyLineUp`](#commands.copyLineUp)
 /// - Shift-Alt-ArrowDown: [`copyLineDown`](#commands.copyLineDown)
 /// - Escape: [`simplifySelection`](#commands.simplifySelection)
-/// - Ctrl-l (Cmd-l on macOS): [`selectLine`](#commands.selectLine)
+/// - Alt-l: [`selectLine`](#commands.selectLine)
 /// - Ctrl-i (Cmd-i on macOS): [`selectParentSyntax`](#commands.selectParentSyntax)
 /// - Ctrl-[ (Cmd-[ on macOS): [`indentLess`](#commands.indentLess)
 /// - Ctrl-] (Cmd-] on macOS): [`indentMore`](#commands.indentMore)
@@ -752,7 +752,7 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Escape", run: simplifySelection},
 
-  {key: "Mod-l", run: selectLine},
+  {key: "Alt-l", run: selectLine},
   {key: "Mod-i", run: selectParentSyntax},
 
   {key: "Mod-[", run: indentLess},
