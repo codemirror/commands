@@ -159,7 +159,7 @@ function changeLineComment(
     let startI = lines.length, minIndent = 1e9
     for (let pos = from; pos <= to;) {
       let line = state.doc.lineAt(pos)
-      if (line.from > prevLine) {
+      if (line.from > prevLine && (from == to || to > line.from)) {
         prevLine = line.from
         let token = getConfig(state, pos).line
         if (!token) continue

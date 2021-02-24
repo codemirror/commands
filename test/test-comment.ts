@@ -128,6 +128,11 @@ describe("comment", () => {
         check(`|line| |with| |ranges|`,
               `${k} |line| |with| |ranges|`)
       })
+
+      it("doesn't include lines in which a selection range ends", () => {
+        check(`line| 1\nline 2\n|line 3`,
+              `${k} line| 1\n${k} line 2\n|line 3`)
+      })
     })
   }
 
