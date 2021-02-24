@@ -54,6 +54,9 @@ describe("commands", () => {
 
     it("doesn't double-indent a given line", () =>
        test("on|e|\n<two\nth><ree\nfour>", "  on|e|\n  <two\n  th><ree\n  four>"))
+
+    it("ignores lines if a range selection ends directly at their start", () =>
+      test("on<e\ntwo\n>three", "  on<e\n  two\n>three"))
   })
 
   describe("indentLess", () => {

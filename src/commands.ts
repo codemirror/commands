@@ -539,13 +539,13 @@ function changeBySelectedLine(state: EditorState, f: (line: Line, changes: Chang
   let atLine = -1
   return state.changeByRange(range => {
     let changes: ChangeSpec[] = []
-    for (let line = state.doc.lineAt(range.from);;) {
-      if (line.number > atLine) {
+    for (let pos = range.from; pos <= range.to;) {
+      let line = state.doc.lineAt(pos)
+      if (line.number > atLine && (range.empty || range.to > line.from)) {
         f(line, changes, range)
         atLine = line.number
       }
-      if (range.to <= line.to) break
-      line = state.doc.lineAt(line.to + 1)
+      pos = line.to + 1
     }
     let changeSet = state.changes(changes)
     return {changes,
