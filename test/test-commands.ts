@@ -158,11 +158,17 @@ describe("commands", () => {
     it("deletes a newline", () =>
       test("one|\ntwo", "one|two"))
 
-    it("deletes a newline with surrounding space", () =>
-      test("one| \n two", "one|two"))
+    it("stops deleting at a newline", () =>
+      test("one| \n two", "one|\n two"))
+
+    it("stops deleting after a newline", () =>
+      test("one|\n two", "one| two"))
 
     it("deletes up to the end of the doc", () =>
-      test("one|\n  ", "one|"))
+      test("one|two", "one|"))
+
+    it("does nothing at the end of the doc", () =>
+      test("one|", "one|"))
   })
 
   describe("deleteGroupBackward", () => {
@@ -185,8 +191,11 @@ describe("commands", () => {
     it("deletes a newline", () =>
       test("one\n|two", "one|two"))
 
-    it("deletes a newline with surrounding space", () =>
-      test("one \n |two", "one|two"))
+    it("stops deleting at a newline", () =>
+      test("one \n |two", "one \n|two"))
+
+    it("stops deleting after a newline", () =>
+      test("one \n|two", "one |two"))
 
     it("deletes up to the start of the doc", () =>
       test("one|two", "|two"))

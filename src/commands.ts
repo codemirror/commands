@@ -353,16 +353,13 @@ const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(targ
   let pos = start, {state} = target, line = state.doc.lineAt(pos)
   let categorize = state.charCategorizer(pos)
   for (let cat: CharCategory | null = null;;) {
-    let next, nextChar
     if (pos == (forward ? line.to : line.from)) {
-      if (line.number == (forward ? state.doc.lines : 1)) break
-      line = state.doc.line(line.number + (forward ? 1 : -1))
-      next = forward ? line.from : line.to
-      nextChar = "\n"
-    } else {
-      next = findClusterBreak(line.text, pos - line.from, forward) + line.from
-      nextChar = line.text.slice(Math.min(pos, next) - line.from, Math.max(pos, next) - line.from)
+      if (pos == start && line.number != (forward ? state.doc.lines : 1))
+        pos += forward ? 1 : -1
+      break
     }
+    let next = findClusterBreak(line.text, pos - line.from, forward) + line.from
+    let nextChar = line.text.slice(Math.min(pos, next) - line.from, Math.max(pos, next) - line.from)
     let nextCat = categorize(nextChar)
     if (cat != null && nextCat != cat) break
     if (nextChar != " " || pos != start) cat = nextCat
