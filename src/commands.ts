@@ -15,7 +15,9 @@ function setSel(state: EditorState, selection: EditorSelection | {anchor: number
   return state.update({selection, scrollIntoView: true, annotations: Transaction.userEvent.of("keyboardselection")})
 }
 
-function moveSel({state, dispatch}: {state: EditorState, dispatch: (tr: Transaction) => void},
+type CommandTarget = {state: EditorState, dispatch: (tr: Transaction) => void}
+
+function moveSel({state, dispatch}: CommandTarget,
                  how: (range: SelectionRange) => SelectionRange): boolean {
   let selection = updateSel(state.selection, how)
   if (selection.eq(state.selection)) return false
@@ -296,8 +298,8 @@ export const simplifySelection: StateCommand = ({state, dispatch}) => {
   return true
 }
 
-function deleteBy(view: EditorView, by: (start: number) => number) {
-  let {state} = view, changes = state.changeByRange(range => {
+function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => number) {
+  let changes = state.changeByRange(range => {
     let {from, to} = range
     if (from == to) {
       let towards = by(from)
@@ -307,12 +309,12 @@ function deleteBy(view: EditorView, by: (start: number) => number) {
     return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from)}
   })
   if (changes.changes.empty) return false
-  view.dispatch(changes, {scrollIntoView: true, annotations: Transaction.userEvent.of("delete")})
+  dispatch(state.update(changes, {scrollIntoView: true, annotations: Transaction.userEvent.of("delete")}))
   return true
 }
 
-const deleteByChar = (view: EditorView, forward: boolean, codePoint: boolean) => deleteBy(view, pos => {
-  let {state} = view, line = state.doc.lineAt(pos), before
+const deleteByChar = (target: CommandTarget, forward: boolean, codePoint: boolean) => deleteBy(target, pos => {
+  let {state} = target, line = state.doc.lineAt(pos), before
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
@@ -320,18 +322,18 @@ const deleteByChar = (view: EditorView, forward: boolean, codePoint: boolean) =>
     for (let i = 0; i < drop && before[before.length - 1 - i] == " "; i++) pos--
     return pos
   }
-  let target
+  let targetPos
   if (codePoint) {
     let next = line.text.slice(pos - line.from + (forward ? 0 : -2),
                                pos - line.from + (forward ? 2 : 0))
     let size = next ? codePointSize(codePointAt(next, 0)) : 1
-    target = forward ? Math.min(state.doc.length, pos + size) : Math.max(0, pos - size)
+    targetPos = forward ? Math.min(state.doc.length, pos + size) : Math.max(0, pos - size)
   } else {
-    target = findClusterBreak(line.text, pos - line.from, forward) + line.from
+    targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
   }
-  if (target == pos && line.number != (forward ? state.doc.lines : 1))
-    target += forward ? 1 : -1
-  return target
+  if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
+    targetPos += forward ? 1 : -1
+  return targetPos
 })
 
 /// Delete the selection, or, for cursor selections, the code point
@@ -347,8 +349,9 @@ export const deleteCharBackward: Command = view => deleteByChar(view, false, fal
 /// Delete the selection or the character after the cursor.
 export const deleteCharForward: Command = view => deleteByChar(view, true, false)
 
-const deleteByGroup = (view: EditorView, forward: boolean) => deleteBy(view, pos => {
-  let {state} = view, line = state.doc.lineAt(pos), categorize = state.charCategorizer(pos)
+const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(target, start => {
+  let pos = start, {state} = target, line = state.doc.lineAt(pos)
+  let categorize = state.charCategorizer(pos)
   for (let cat: CharCategory | null = null;;) {
     let next, nextChar
     if (pos == (forward ? line.to : line.from)) {
@@ -362,17 +365,18 @@ const deleteByGroup = (view: EditorView, forward: boolean) => deleteBy(view, pos
     }
     let nextCat = categorize(nextChar)
     if (cat != null && nextCat != cat) break
-    if (nextCat != CharCategory.Space) cat = nextCat
+    if (nextChar != " " || pos != start) cat = nextCat
     pos = next
   }
   return pos
 })
 
 /// Delete the selection or backward until the end of the next
-/// [group](#view.EditorView.moveByGroup).
-export const deleteGroupBackward: Command = view => deleteByGroup(view, false)
+/// [group](#view.EditorView.moveByGroup), only skipping groups of
+/// whitespace when they consist of a single space.
+export const deleteGroupBackward: StateCommand = target => deleteByGroup(target, false)
 /// Delete the selection or forward until the end of the next group.
-export const deleteGroupForward: Command = view => deleteByGroup(view, true)
+export const deleteGroupForward: StateCommand = target => deleteByGroup(target, true)
 
 /// Delete the selection, or, if it is a cursor selection, delete to
 /// the end of the line. If the cursor is directly at the end of the

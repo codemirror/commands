@@ -1,5 +1,6 @@
 import {EditorState, EditorSelection, StateCommand, Extension} from "@codemirror/state"
-import {indentMore, indentLess, indentSelection, insertNewlineAndIndent, deleteTrailingWhitespace} from "@codemirror/commands"
+import {indentMore, indentLess, indentSelection, insertNewlineAndIndent,
+        deleteTrailingWhitespace, deleteGroupForward, deleteGroupBackward} from "@codemirror/commands"
 import {javascriptLanguage} from "@codemirror/lang-javascript"
 import ist from "ist"
 
@@ -135,5 +136,59 @@ describe("commands", () => {
 
     it("can handle empty lines", () =>
       test("one  \n\ntwo ", "one\n\ntwo"))
+  })
+
+  describe("deleteGroupForward", () => {
+    function test(from: string, to: string) {
+      ist(stateStr(cmd(mkState(from), deleteGroupForward)), to)
+    }
+
+    it("deletes a word", () =>
+      test("one |two three", "one | three"))
+
+    it("deletes a word with leading space", () =>
+      test("one| two three", "one| three"))
+
+    it("deletes a group of punctuation", () =>
+      test("one|...two", "one|two"))
+
+    it("deletes a group of space", () =>
+      test("one|  \ttwo", "one|two"))
+
+    it("deletes a newline", () =>
+      test("one|\ntwo", "one|two"))
+
+    it("deletes a newline with surrounding space", () =>
+      test("one| \n two", "one|two"))
+
+    it("deletes up to the end of the doc", () =>
+      test("one|\n  ", "one|"))
+  })
+
+  describe("deleteGroupBackward", () => {
+    function test(from: string, to: string) {
+      ist(stateStr(cmd(mkState(from), deleteGroupBackward)), to)
+    }
+
+    it("deletes a word", () =>
+      test("one two| three", "one | three"))
+
+    it("deletes a word with trailing space", () =>
+      test("one two |three", "one |three"))
+
+    it("deletes a group of punctuation", () =>
+      test("one...|two", "one|two"))
+
+    it("deletes a group of space", () =>
+      test("one \t |two", "one|two"))
+
+    it("deletes a newline", () =>
+      test("one\n|two", "one|two"))
+
+    it("deletes a newline with surrounding space", () =>
+      test("one \n |two", "one|two"))
+
+    it("deletes up to the start of the doc", () =>
+      test("one|two", "|two"))
   })
 })
