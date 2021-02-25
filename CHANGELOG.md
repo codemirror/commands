@@ -1,3 +1,13 @@
+## 0.17.5 (2021-02-25)
+
+### Bug fixes
+
+Use Alt-l for the default `selectLine` binding, because Mod-l already has an important meaning in the browser.
+
+Make `deleteGroupBackward`/`deleteGroupForward` delete groups of whitespace when bigger than a single space.
+
+Don't change lines that have the end of a range selection directly at their start in `indentLess`, `indentMore`, and `indentSelection`.
+
 ## 0.17.4 (2021-02-18)
 
 ### Bug fixes
