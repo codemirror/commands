@@ -6,8 +6,8 @@ import {KeyBinding} from "@codemirror/view"
 /// data](#state.EditorState.languageDataAt) under a `"commentTokens"`
 /// property to configure comment syntax for a language.
 export interface CommentTokens {
-  /// The block comment syntax, if any. For example, for JavaScript
-  /// you'd provide `{open: "/*", close: "*/"}`.
+  /// The block comment syntax, if any. For example, for HTML
+  /// you'd provide `{open: "<!--", close: "-->"}`.
   block?: {open: string, close: string},
   /// The line comment syntax. For example `"//"`.
   line?: string
