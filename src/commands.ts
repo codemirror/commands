@@ -718,8 +718,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
 
   {key: "Mod-a", run: selectAll},
 
-  {key: "Backspace", run: deleteCodePointBackward},
-  {key: "Delete", run: deleteCharForward},
+  {key: "Backspace", run: deleteCodePointBackward, shift: deleteCodePointBackward},
+  {key: "Delete", run: deleteCharForward, shift: deleteCharForward},
   {key: "Mod-Backspace", mac: "Alt-Backspace", run: deleteGroupBackward},
   {key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward},
 ] as KeyBinding[]).concat(emacsStyleKeymap.map(b => ({mac: b.key, run: b.run, shift: b.shift})))
