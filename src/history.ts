@@ -37,7 +37,7 @@ const historyConfig = Facet.define<HistoryConfig, Required<HistoryConfig>>({
   }
 })
 
-const historyField = StateField.define({
+const historyField_ = StateField.define({
   create() {
     return HistoryState.empty
   },
@@ -70,13 +70,21 @@ const historyField = StateField.define({
 
     if (isolate == "full" || isolate == "after") state = state.isolate()
     return state
+  },
+
+  toJSON(value) {
+    return {done: value.done.map(e => e.toJSON()), undone: value.undone.map(e => e.toJSON())}
+  },
+
+  fromJSON(json) {
+    return new HistoryState(json.done.map(HistEvent.fromJSON), json.undone.map(HistEvent.fromJSON))
   }
 })
 
 /// Create a history extension with the given configuration.
 export function history(config: HistoryConfig = {}): Extension {
   return [
-    historyField,
+    historyField_,
     historyConfig.of(config),
     EditorView.domEventHandlers({
       beforeinput(e, view) {
@@ -88,9 +96,16 @@ export function history(config: HistoryConfig = {}): Extension {
   ]
 }
 
+/// The state field used to store the history data. Should probably
+/// only be used when you want to
+/// [serialize](#state.EditorState.toJSON) or
+/// [deserialize](#state.EditorState^fromJSON) state objects in a way
+/// that preserves history.
+export const historyField = historyField_ as StateField<unknown>
+
 function cmd(side: BranchName, selection: boolean): StateCommand {
   return function({state, dispatch}: {state: EditorState, dispatch: (tr: Transaction) => void}) {
-    let historyState = state.field(historyField, false)
+    let historyState = state.field(historyField_, false)
     if (!historyState) return false
     let tr = historyState.pop(side, state, selection)
     if (!tr) return false
@@ -114,7 +129,7 @@ export const redoSelection = cmd(BranchName.Undone, true)
 
 function depth(side: BranchName) {
   return function(state: EditorState): number {
-    let histState = state.field(historyField, false)
+    let histState = state.field(historyField_, false)
     if (!histState) return 0
     let branch = side == BranchName.Done ? histState.done : histState.undone
     return branch.length - (branch.length && !branch[0].changes ? 1 : 0)
@@ -148,6 +163,25 @@ class HistEvent {
 
   setSelAfter(after: readonly EditorSelection[]) {
     return new HistEvent(this.changes, this.effects, this.mapped, this.startSelection, after)
+  }
+
+  toJSON() {
+    return {
+      changes: this.changes?.toJSON(),
+      mapped: this.mapped?.toJSON(),
+      startSelection: this.startSelection?.toJSON(),
+      selectionsAfter: this.selectionsAfter.map(s => s.toJSON())
+    }
+  }
+
+  static fromJSON(json: any) {
+    return new HistEvent(
+      json.changes && ChangeSet.fromJSON(json.changes),
+      [],
+      json.mapped && ChangeDesc.fromJSON(json.mapped),
+      json.startSelection && EditorSelection.fromJSON(json.startSelection),
+      json.selectionsAfter.map(EditorSelection.fromJSON)
+    )
   }
 
   // This does not check `addToHistory` and such, it assumes the

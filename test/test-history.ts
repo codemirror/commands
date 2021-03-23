@@ -3,7 +3,7 @@ import ist from "ist"
 import {EditorState, EditorSelection, Transaction,
         StateEffect, StateEffectType, StateField, ChangeDesc} from "@codemirror/state"
 import {isolateHistory, history, redo, redoDepth, redoSelection, undo, undoDepth,
-        undoSelection, invertedEffects} from "@codemirror/history"
+        undoSelection, invertedEffects, historyField} from "@codemirror/history"
 
 function mkState(config?: any, doc?: string) {
   return EditorState.create({
@@ -565,6 +565,23 @@ describe("history", () => {
       ist(commentStr(state), "")
       state = command(state, undo)
       ist(commentStr(state), "c1@3")
+    })
+  })
+
+  describe("JSON", () => {
+    it("survives serialization", () => {
+      let state = EditorState.create({doc: "abcd", extensions: history()})
+      state = state.update({changes: {from: 3, to: 4}}).state
+      state = state.update({changes: {from: 0, insert: "d"}}).state
+      state = command(state, undo)
+      let jsonConf = {history: historyField}
+      let json = JSON.stringify(state.toJSON(jsonConf))
+      state = EditorState.fromJSON(JSON.parse(json), {extensions: history()}, jsonConf)
+      ist(state.doc.toString(), "abc")
+      state = command(state, redo)
+      ist(state.doc.toString(), "dabc")
+      state = command(command(state, undo), undo)
+      ist(state.doc.toString(), "abcd")
     })
   })
 })
