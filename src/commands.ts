@@ -384,6 +384,15 @@ export const deleteToLineEnd: Command = view => deleteBy(view, pos => {
   return Math.min(view.state.doc.length, pos + 1)
 })
 
+/// Delete the selection, or, if it is a cursor selection, delete to
+/// the start of the line. If the cursor is directly at the start of the
+/// line, delete the line break before it.
+export const deleteToLineStart: Command = view => deleteBy(view, pos => {
+  let lineStart = view.visualLineAt(pos).from
+  if (pos > lineStart) return lineStart
+  return Math.max(0, pos - 1)
+})
+
 /// Delete all whitespace directly before a line end from the
 /// document.
 export const deleteTrailingWhitespace: StateCommand = ({state, dispatch}) => {
@@ -688,6 +697,8 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - Delete: [`deleteCharForward`](#commands.deleteCharForward)
 ///  - Ctrl-Backspace (Alt-Backspace on macOS): [`deleteGroupBackward`](#commands.deleteGroupBackward)
 ///  - Ctrl-Delete (Alt-Delete on macOS): [`deleteGroupForward`](#commands.deleteGroupForward)
+///  - Cmd-Backspace (macOS): [`deleteToLineStart`](#commands.deleteToLineStart).
+///  - Cmd-Delete (macOS): [`deleteToLineEnd`](#commands.deleteToLineEnd).
 export const standardKeymap: readonly KeyBinding[] = ([
   {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft},
   {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft},
@@ -722,6 +733,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
   {key: "Delete", run: deleteCharForward, shift: deleteCharForward},
   {key: "Mod-Backspace", mac: "Alt-Backspace", run: deleteGroupBackward},
   {key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward},
+  {mac: "Mod-Backspace", run: deleteToLineStart},
+  {mac: "Mod-Delete", run: deleteToLineEnd}
 ] as KeyBinding[]).concat(emacsStyleKeymap.map(b => ({mac: b.key, run: b.run, shift: b.shift})))
 
 /// The default keymap. Includes all bindings from
