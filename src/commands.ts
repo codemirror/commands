@@ -5,6 +5,7 @@ import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation} from "@codemirror/language"
+import {SearchCursor} from "@codemirror/search"
 import {SyntaxNode, NodeProp} from "lezer-tree"
 
 function updateSel(sel: EditorSelection, by: (range: SelectionRange) => SelectionRange) {
@@ -283,6 +284,68 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
     return EditorSelection.range(context.to, context.from)
   })
   dispatch(setSel(state, selection))
+  return true
+}
+
+const selectWord: Command = (view) => {
+  return moveSel(view, range => {
+    let categorize = view.state.charCategorizer(range.from)
+
+    let prev = view.state.sliceDoc(range.from - 1, range.from)
+    let prevWord = categorize(prev) == CharCategory.Word
+    let { from } = prevWord ? view.moveByGroup(range, false) : range
+
+    let next = view.state.sliceDoc(range.from, range.from + 1)
+    let nextWord = categorize(next) == CharCategory.Word
+    let { to } = nextWord ? view.moveByGroup(range, true) : range
+
+    return EditorSelection.range(from, to)
+  })
+}
+
+const findNextOccurrence = (state: EditorState, searchedText: string) => {
+  let { ranges } = state.selection
+  let cursor = new SearchCursor(state.doc, searchedText, ranges[ranges.length - 1].to)
+
+  let found = cursor.next()
+  if (!cursor.done) return found.value
+
+  cursor = new SearchCursor(state.doc, searchedText, 0, Math.max(0, ranges[ranges.length - 1].from - 1))
+
+  while (true) {
+    found = cursor.next()
+    if (cursor.done) break
+    if (!ranges.find((r) => r.from === found.value.from)) {
+      return found.value
+    }
+  }
+
+  return null
+}
+
+export const selectNextOccurrence: Command = (view) => {
+  let { ranges } = view.state.selection
+  if (ranges.some((sel) => sel.from === sel.to)) {
+    selectWord(view)
+    return true
+  }
+
+  let searchedText = view.state.sliceDoc(ranges[0].from, ranges[0].to)
+  if (view.state.selection.ranges.some(
+    (range) => view.state.sliceDoc(range.from, range.to) !== searchedText
+  )) {
+    return true
+  }
+
+  let range = findNextOccurrence(view.state, searchedText)
+
+  if (range) {
+    view.dispatch(setSel(view.state,
+      view.state.selection.addRange(
+        EditorSelection.range(range.from, range.to)
+      )
+    ))
+  }
   return true
 }
 
@@ -775,7 +838,9 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Shift-Mod-k", run: deleteLine},
 
-  {key: "Shift-Mod-\\", run: cursorMatchingBracket}
+  {key: "Shift-Mod-\\", run: cursorMatchingBracket},
+
+  {key: "Mod-d", run: selectNextOccurrence},
 ] as readonly KeyBinding[]).concat(standardKeymap)
 
 /// A binding that binds Tab to [`insertTab`](#commands.insertTab) and
