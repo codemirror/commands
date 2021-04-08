@@ -1,3 +1,15 @@
+## 0.18.1 (2021-04-08)
+
+### Bug fixes
+
+Also bind Shift-Backspace and Shift-Delete in the default keymap (to do the same thing as the Shift-less binding).
+
+### New features
+
+Adds a `deleteToLineStart` command.
+
+Adds bindings for Cmd-Delete and Cmd-Backspace on macOS.
+
 ## 0.18.0 (2021-03-03)
 
 ### Breaking changes
