@@ -640,7 +640,7 @@ export const insertTab: StateCommand = ({state, dispatch}) => {
 ///  - Ctrl-v: [`cursorPageDown`](#commands.cursorPageDown)
 ///  - Alt-v: [`cursorPageUp`](#commands.cursorPageUp)
 export const emacsStyleKeymap: readonly KeyBinding[] = [
-  {key:"Ctrl-b", run: cursorCharLeft, shift: selectCharLeft},
+  {key: "Ctrl-b", run: cursorCharLeft, shift: selectCharLeft, preventDefault: true},
   {key: "Ctrl-f", run: cursorCharRight, shift: selectCharRight},
 
   {key: "Ctrl-p", run: cursorLineUp, shift: selectLineUp},
@@ -767,7 +767,7 @@ export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Escape", run: simplifySelection},
 
   {key: "Alt-l", run: selectLine},
-  {key: "Mod-i", run: selectParentSyntax},
+  {key: "Mod-i", run: selectParentSyntax, preventDefault: true},
 
   {key: "Mod-[", run: indentLess},
   {key: "Mod-]", run: indentMore},
