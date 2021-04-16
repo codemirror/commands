@@ -131,6 +131,8 @@ with key bindings for a lot of them.
 
 @deleteGroupForward
 
+@deleteToLineStart
+
 @deleteToLineEnd
 
 @deleteTrailingWhitespace
