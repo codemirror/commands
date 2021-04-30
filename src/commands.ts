@@ -766,7 +766,7 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Escape", run: simplifySelection},
 
-  {key: "Alt-l", run: selectLine},
+  {key: "Alt-l", mac: "Ctrl-l", run: selectLine},
   {key: "Mod-i", run: selectParentSyntax, preventDefault: true},
 
   {key: "Mod-[", run: indentLess},
