@@ -702,11 +702,11 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 export const standardKeymap: readonly KeyBinding[] = ([
   {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft},
   {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft},
-  {mac: "Cmd-ArrowLeft", run: cursorLineStart, shift: selectLineStart},
+  {mac: "Cmd-ArrowLeft", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward},
 
   {key: "ArrowRight", run: cursorCharRight, shift: selectCharRight},
   {key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: cursorGroupRight, shift: selectGroupRight},
-  {mac: "Cmd-ArrowRight", run: cursorLineEnd, shift: selectLineEnd},
+  {mac: "Cmd-ArrowRight", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward},
 
   {key: "ArrowUp", run: cursorLineUp, shift: selectLineUp},
   {mac: "Cmd-ArrowUp", run: cursorDocStart, shift: selectDocStart},
