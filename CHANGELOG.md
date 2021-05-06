@@ -1,3 +1,11 @@
+## 0.18.2 (2021-05-06)
+
+### Bug fixes
+
+Use Ctrl-l, not Alt-l, to bind `selectLine` on macOS, to avoid conflicting with special-character-insertion bindings.
+
+Make the macOS Command-ArrowLeft/Right commands behave more like their native versions.
+
 ## 0.18.1 (2021-04-08)
 
 ### Bug fixes
