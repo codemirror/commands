@@ -103,8 +103,7 @@ describe("comment", () => {
               `\n  ${k} lin|e 1\n  ${k}  line 2\n  ${k} line |3\n`)
 
         check(`\n  ${k}lin|e 1\n  ${k}  line 2\n   line 3\n  ${k} li|ne 4\n`,
-              `\n  lin|e 1\n   line 2\n   line 3\n  li|ne 4\n`,
-              `\n  ${k} lin|e 1\n  ${k}  line 2\n  ${k}  line 3\n  ${k} li|ne 4\n`)
+              `\n  ${k} ${k}lin|e 1\n  ${k} ${k}  line 2\n  ${k}  line 3\n  ${k} ${k} li|ne 4\n`)
 
         check(`\n  ${k} lin|e 1\n\n  ${k} line |3\n`,
               `\n  lin|e 1\n\n  line |3\n`)
@@ -132,6 +131,16 @@ describe("comment", () => {
       it("doesn't include lines in which a selection range ends", () => {
         check(`line| 1\nline 2\n|line 3`,
               `${k} line| 1\n${k} line 2\n|line 3`)
+      })
+
+      it("leaves empty lines alone", () => {
+        check(`line| 1\n\nline 3|`,
+              `${k} line| 1\n\n${k} line 3|`)
+      })
+
+      it("does comment empty lines with a cursor", () => {
+        check(`|\nline 2`,
+              `${k} |\nline 2`)
       })
     })
   }

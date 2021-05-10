@@ -153,7 +153,7 @@ function changeLineComment(
   ranges: readonly {readonly from: number, readonly to: number}[],
   state: EditorState
 ): TransactionSpec | null {
-  let lines: {line: Line, token: string, comment: number, indent: number, single: boolean}[] = []
+  let lines: {line: Line, token: string, comment: number, empty: boolean, indent: number, single: boolean}[] = []
   let prevLine = -1
   for (let {from, to} of ranges) {
     let startI = lines.length, minIndent = 1e9
@@ -164,9 +164,10 @@ function changeLineComment(
         let token = getConfig(state, pos).line
         if (!token) continue
         let indent = /^\s*/.exec(line.text)![0].length
+        let empty = indent == line.length
         let comment = line.text.slice(indent, indent + token.length) == token ? indent : -1
         if (indent < line.text.length && indent < minIndent) minIndent = indent
-        lines.push({line, comment, token, indent, single: false})
+        lines.push({line, comment, token, indent, empty, single: false})
       }
       pos = line.to + 1
     }
@@ -175,7 +176,13 @@ function changeLineComment(
     if (lines.length == startI + 1) lines[startI].single = true
   }
 
-  if (option != CommentOption.Comment && lines.some(l => l.comment >= 0)) {
+  if (option != CommentOption.Uncomment && lines.some(l => l.comment < 0 && (!l.empty || l.single))) {
+    let changes = []
+    for (let {line, token, indent, empty, single} of lines) if (single || !empty)
+      changes.push({from: line.from + indent, insert: token + " "})
+    let changeSet = state.changes(changes)
+    return {changes: changeSet, selection: state.selection.map(changeSet, 1)}
+  } else if (option != CommentOption.Comment && lines.some(l => l.comment >= 0)) {
     let changes = []
     for (let {line, comment, token} of lines) if (comment >= 0) {
       let from = line.from + comment, to = from + token.length
@@ -183,12 +190,6 @@ function changeLineComment(
       changes.push({from, to})
     }
     return {changes}
-  } else if (option != CommentOption.Uncomment && lines.some(l => l.comment < 0)) {
-    let changes = []
-    for (let {line, comment, token, indent, single} of lines) if (comment != indent && (single || /\S/.test(line.text)))
-      changes.push({from: line.from + indent, insert: token + " "})
-    let changeSet = state.changes(changes)
-    return {changes: changeSet, selection: state.selection.map(changeSet, 1)}
   }
   return null
 }
