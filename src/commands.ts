@@ -444,27 +444,43 @@ function selectedLineBlocks(state: EditorState) {
   let blocks = [], upto = -1
   for (let range of state.selection.ranges) {
     let startLine = state.doc.lineAt(range.from), endLine = state.doc.lineAt(range.to)
-    if (upto == startLine.number) blocks[blocks.length - 1].to = endLine.to
-    else blocks.push({from: startLine.from, to: endLine.to})
-    upto = endLine.number
+    if (!range.empty && range.to == endLine.from) endLine = state.doc.lineAt(range.to - 1)
+    if (upto >= startLine.number) {
+      let prev = blocks[blocks.length - 1]
+      prev.to = endLine.to
+      prev.ranges.push(range)
+    } else {
+      blocks.push({from: startLine.from, to: endLine.to, ranges: [range]})
+    }
+    upto = endLine.number + 1
   }
   return blocks
 }
 
 function moveLine(state: EditorState, dispatch: (tr: Transaction) => void, forward: boolean): boolean {
-  let changes = []
+  let changes = [], ranges = []
   for (let block of selectedLineBlocks(state)) {
     if (forward ? block.to == state.doc.length : block.from == 0) continue
     let nextLine = state.doc.lineAt(forward ? block.to + 1 : block.from - 1)
-    if (forward)
+    let size = nextLine.length + 1
+    if (forward) {
       changes.push({from: block.to, to: nextLine.to},
                    {from: block.from, insert: nextLine.text + state.lineBreak})
-    else
+      for (let r of block.ranges)
+        ranges.push(EditorSelection.range(Math.min(state.doc.length, r.anchor + size), Math.min(state.doc.length, r.head + size)))
+    } else {
       changes.push({from: nextLine.from, to: block.from},
                    {from: block.to, insert: state.lineBreak + nextLine.text})
+      for (let r of block.ranges)
+        ranges.push(EditorSelection.range(r.anchor - size, r.head - size))
+    }
   }
   if (!changes.length) return false
-  dispatch(state.update({changes, scrollIntoView: true}))
+  dispatch(state.update({
+    changes,
+    scrollIntoView: true,
+    selection: EditorSelection.create(ranges, state.selection.mainIndex)
+  }))
   return true
 }
 
@@ -700,19 +716,19 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - Cmd-Backspace (macOS): [`deleteToLineStart`](#commands.deleteToLineStart).
 ///  - Cmd-Delete (macOS): [`deleteToLineEnd`](#commands.deleteToLineEnd).
 export const standardKeymap: readonly KeyBinding[] = ([
-  {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft},
+  {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft, preventDefault: true},
   {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft},
   {mac: "Cmd-ArrowLeft", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward},
 
-  {key: "ArrowRight", run: cursorCharRight, shift: selectCharRight},
+  {key: "ArrowRight", run: cursorCharRight, shift: selectCharRight, preventDefault: true},
   {key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: cursorGroupRight, shift: selectGroupRight},
   {mac: "Cmd-ArrowRight", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward},
 
-  {key: "ArrowUp", run: cursorLineUp, shift: selectLineUp},
+  {key: "ArrowUp", run: cursorLineUp, shift: selectLineUp, preventDefault: true},
   {mac: "Cmd-ArrowUp", run: cursorDocStart, shift: selectDocStart},
   {mac: "Ctrl-ArrowUp", run: cursorPageUp, shift: selectPageUp},
 
-  {key: "ArrowDown", run: cursorLineDown, shift: selectLineDown},
+  {key: "ArrowDown", run: cursorLineDown, shift: selectLineDown, preventDefault: true},
   {mac: "Cmd-ArrowDown", run: cursorDocEnd, shift: selectDocEnd},
   {mac: "Ctrl-ArrowDown", run: cursorPageDown, shift: selectPageDown},
 

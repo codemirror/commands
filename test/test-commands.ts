@@ -1,6 +1,7 @@
 import {EditorState, EditorSelection, StateCommand, Extension} from "@codemirror/state"
 import {indentMore, indentLess, indentSelection, insertNewlineAndIndent,
-        deleteTrailingWhitespace, deleteGroupForward, deleteGroupBackward} from "@codemirror/commands"
+        deleteTrailingWhitespace, deleteGroupForward, deleteGroupBackward,
+        moveLineUp, moveLineDown} from "@codemirror/commands"
 import {javascriptLanguage} from "@codemirror/lang-javascript"
 import ist from "ist"
 
@@ -202,5 +203,50 @@ describe("commands", () => {
 
     it("deletes up to the start of the doc", () =>
       test("one|two", "|two"))
+  })
+
+  describe("moveLineUp", () => {
+    function test(from: string, to: string) {
+      ist(stateStr(cmd(mkState(from), moveLineUp)), to)
+    }
+
+    it("can move a line up", () =>
+      test("one\ntwo|\nthree", "two|\none\nthree"))
+
+    it("preserves multiple cursors on a single line", () =>
+      test("one\nt|w|o|\n", "t|w|o|\none\n"))
+
+    it("moves selected blocks as one", () =>
+      test("one\ntwo\nthr<ee\nfour\nfive>\n", "one\nthr<ee\nfour\nfive>\ntwo\n"))
+
+    it("moves blocks made of multiple ranges as one", () =>
+      test("one\n<two\nth>ree\nfo|u<r\nfive>\n", "<two\nth>ree\nfo|u<r\nfive>\none\n"))
+
+    it("does not include a trailing line after a range", () =>
+      test("one\n<two\nthree\n>four", "<two\nthree\n>one\nfour"))
+  })
+
+  describe("moveLineDown", () => {
+    function test(from: string, to: string) {
+      ist(stateStr(cmd(mkState(from), moveLineDown)), to)
+    }
+
+    it("can move a line own", () =>
+      test("one\ntwo|\nthree", "one\nthree\ntwo|"))
+
+    it("preserves multiple cursors on a single line", () =>
+      test("one\nt|w|o|\nthree", "one\nthree\nt|w|o|"))
+
+    it("moves selected blocks as one", () =>
+      test("one\ntwo\nthr<ee\nfour\nfive>\nsix", "one\ntwo\nsix\nthr<ee\nfour\nfive>"))
+
+    it("moves blocks made of multiple ranges as one", () =>
+      test("one\n<two\nth>ree\nfo|u<r\nfive>\nsix\n", "one\nsix\n<two\nth>ree\nfo|u<r\nfive>\n"))
+
+    it("does not include a trailing line after a range", () =>
+      test("one\n<two\nthree\n>four\n", "one\nfour\n<two\nthree\n>"))
+
+    it("clips the selection when moving to the end of the doc", () =>
+      test("one\n<two\nthree\n>four", "one\nfour\n<two\nthree>"))
   })
 })
