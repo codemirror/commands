@@ -1,3 +1,11 @@
+## 0.18.3 (2021-06-11)
+
+### Bug fixes
+
+`moveLineDown` will no longer incorrectly grow the selection.
+
+Line-based commands will no longer include lines where a range selection ends right at the start of the line.
+
 ## 0.18.2 (2021-05-06)
 
 ### Bug fixes
