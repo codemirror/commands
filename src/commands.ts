@@ -1,6 +1,6 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
         ChangeSpec, Transaction, CharCategory} from "@codemirror/state"
-import {findClusterBreak, Text, Line, countColumn, codePointAt, codePointSize} from "@codemirror/text"
+import {findClusterBreak, Text, Line, countColumn} from "@codemirror/text"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
@@ -313,7 +313,7 @@ function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => numbe
   return true
 }
 
-const deleteByChar = (target: CommandTarget, forward: boolean, codePoint: boolean) => deleteBy(target, pos => {
+const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, pos => {
   let {state} = target, line = state.doc.lineAt(pos), before
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
@@ -322,32 +322,17 @@ const deleteByChar = (target: CommandTarget, forward: boolean, codePoint: boolea
     for (let i = 0; i < drop && before[before.length - 1 - i] == " "; i++) pos--
     return pos
   }
-  let targetPos
-  if (codePoint) {
-    let next = line.text.slice(pos - line.from + (forward ? 0 : -2),
-                               pos - line.from + (forward ? 2 : 0))
-    let size = next ? codePointSize(codePointAt(next, 0)) : 1
-    targetPos = forward ? Math.min(state.doc.length, pos + size) : Math.max(0, pos - size)
-  } else {
-    targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
-  }
+  let targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
   if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
     targetPos += forward ? 1 : -1
   return targetPos
 })
 
-/// Delete the selection, or, for cursor selections, the code point
-/// before the cursor.
-export const deleteCodePointBackward: Command = view => deleteByChar(view, false, true)
-/// Delete the selection, or, for cursor selections, the code point
-/// after the cursor.
-export const deleteCodePointForward: Command = view => deleteByChar(view, true, true)
-
 /// Delete the selection, or, for cursor selections, the character
 /// before the cursor.
-export const deleteCharBackward: Command = view => deleteByChar(view, false, false)
+export const deleteCharBackward: Command = view => deleteByChar(view, false)
 /// Delete the selection or the character after the cursor.
-export const deleteCharForward: Command = view => deleteByChar(view, true, false)
+export const deleteCharForward: Command = view => deleteByChar(view, true)
 
 const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(target, start => {
   let pos = start, {state} = target, line = state.doc.lineAt(pos)
@@ -709,7 +694,7 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - Ctrl-End (Cmd-Home on macOS): [`cursorDocEnd`](#commands.cursorDocEnd) ([`selectDocEnd`](#commands.selectDocEnd) with Shift)
 ///  - Enter: [`insertNewlineAndIndent`](#commands.insertNewlineAndIndent)
 ///  - Ctrl-a (Cmd-a on macOS): [`selectAll`](#commands.selectAll)
-///  - Backspace: [`deleteCodePointBackward`](#commands.deleteCodePointBackward)
+///  - Backspace: [`deleteCharBackward`](#commands.deleteCharBackward)
 ///  - Delete: [`deleteCharForward`](#commands.deleteCharForward)
 ///  - Ctrl-Backspace (Alt-Backspace on macOS): [`deleteGroupBackward`](#commands.deleteGroupBackward)
 ///  - Ctrl-Delete (Alt-Delete on macOS): [`deleteGroupForward`](#commands.deleteGroupForward)
@@ -745,7 +730,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
 
   {key: "Mod-a", run: selectAll},
 
-  {key: "Backspace", run: deleteCodePointBackward, shift: deleteCodePointBackward},
+  {key: "Backspace", run: deleteCharBackward, shift: deleteCharBackward},
   {key: "Delete", run: deleteCharForward, shift: deleteCharForward},
   {key: "Mod-Backspace", mac: "Alt-Backspace", run: deleteGroupBackward},
   {key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward},
