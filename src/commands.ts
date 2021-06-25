@@ -5,7 +5,7 @@ import {EditorView, Command, Direction, KeyBinding, PluginField} from "@codemirr
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation} from "@codemirror/language"
-import {SyntaxNode, NodeProp} from "lezer-tree"
+import {SyntaxNode, NodeProp} from "@lezer/common"
 
 function updateSel(sel: EditorSelection, by: (range: SelectionRange) => SelectionRange) {
   return EditorSelection.create(sel.ranges.map(by), sel.mainIndex)
