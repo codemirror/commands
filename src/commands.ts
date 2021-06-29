@@ -630,12 +630,9 @@ export const insertTab: StateCommand = ({state, dispatch}) => {
 ///  - Ctrl-d: [`deleteCharForward`](#commands.deleteCharForward)
 ///  - Ctrl-h: [`deleteCharBackward`](#commands.deleteCharBackward)
 ///  - Ctrl-k: [`deleteToLineEnd`](#commands.deleteToLineEnd)
-///  - Alt-d: [`deleteGroupForward`](#commands.deleteGroupForward)
 ///  - Ctrl-Alt-h: [`deleteGroupBackward`](#commands.deleteGroupBackward)
 ///  - Ctrl-o: [`splitLine`](#commands.splitLine)
 ///  - Ctrl-t: [`transposeChars`](#commands.transposeChars)
-///  - Alt-f: [`cursorGroupForward`](#commands.cursorGroupForward) ([`selectGroupForward`](#commands.selectGroupForward) with Shift)
-///  - Alt-b: [`cursorGroupBackward`](#commands.cursorGroupBackward) ([`selectGroupBackward`](#commands.selectGroupBackward) with Shift)
 ///  - Alt-<: [`cursorDocStart`](#commands.cursorDocStart)
 ///  - Alt->: [`cursorDocEnd`](#commands.cursorDocEnd)
 ///  - Ctrl-v: [`cursorPageDown`](#commands.cursorPageDown)
@@ -653,14 +650,10 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
   {key: "Ctrl-d", run: deleteCharForward},
   {key: "Ctrl-h", run: deleteCharBackward},
   {key: "Ctrl-k", run: deleteToLineEnd},
-  {key: "Alt-d", run: deleteGroupForward},
   {key: "Ctrl-Alt-h", run: deleteGroupBackward},
 
   {key: "Ctrl-o", run: splitLine},
   {key: "Ctrl-t", run: transposeChars},
-
-  {key: "Alt-f", run: cursorGroupForward, shift: selectGroupForward},
-  {key: "Alt-b", run: cursorGroupBackward, shift: selectGroupBackward},
 
   {key: "Alt-<", run: cursorDocStart},
   {key: "Alt->", run: cursorDocEnd},
