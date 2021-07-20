@@ -1,7 +1,7 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
         ChangeSpec, Transaction, CharCategory} from "@codemirror/state"
 import {findClusterBreak, Text, Line, countColumn} from "@codemirror/text"
-import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
+import {EditorView, Command, Direction, KeyBinding, PluginField} from "@codemirror/view"
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation} from "@codemirror/language"
@@ -314,17 +314,22 @@ function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => numbe
 }
 
 const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, pos => {
-  let {state} = target, line = state.doc.lineAt(pos), before
+  let {state} = target, line = state.doc.lineAt(pos), before, targetPos
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
     let col = countColumn(before, 0, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state)
     for (let i = 0; i < drop && before[before.length - 1 - i] == " "; i++) pos--
-    return pos
+    targetPos = pos
+  } else {
+    targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
+    if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
+      targetPos += forward ? 1 : -1
   }
-  let targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
-  if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
-    targetPos += forward ? 1 : -1
+  if (target instanceof EditorView) for (let ranges of target.pluginField(PluginField.atomicRanges))
+    ranges.between(targetPos, targetPos, (from, to) => {
+      targetPos = forward ? to : from
+    })
   return targetPos
 })
 
