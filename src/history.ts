@@ -320,7 +320,7 @@ class HistoryState {
     let last = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none
     if (last.length > 0 &&
         time - this.prevTime < newGroupDelay &&
-        userEvent == "keyboardselection" && this.prevUserEvent == userEvent &&
+        userEvent && userEvent == this.prevUserEvent && /^select($|\.)/.test(userEvent) &&
         eqSelectionShape(last[last.length - 1], selection))
       return this
     return new HistoryState(addSelection(this.done, selection), this.undone, time, userEvent)
@@ -339,7 +339,8 @@ class HistoryState {
     if (selection && event.selectionsAfter.length) {
       return state.update({
         selection: event.selectionsAfter[event.selectionsAfter.length - 1],
-        annotations: fromHistory.of({side, rest: popSelection(branch)})
+        annotations: fromHistory.of({side, rest: popSelection(branch)}),
+        userEvent: side == BranchName.Done ? "select.undo" : "select.redo"
       })
     } else if (!event.changes) {
       return null
@@ -351,7 +352,8 @@ class HistoryState {
         selection: event.startSelection,
         effects: event.effects,
         annotations: fromHistory.of({side, rest}),
-        filter: false
+        filter: false,
+        userEvent: side == BranchName.Done ? "undo" : "redo"
       })
     }
   }
