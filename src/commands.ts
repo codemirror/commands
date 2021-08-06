@@ -12,7 +12,7 @@ function updateSel(sel: EditorSelection, by: (range: SelectionRange) => Selectio
 }
 
 function setSel(state: EditorState, selection: EditorSelection | {anchor: number, head?: number}) {
-  return state.update({selection, scrollIntoView: true, annotations: Transaction.userEvent.of("keyboardselection")})
+  return state.update({selection, scrollIntoView: true, userEvent: "select"})
 }
 
 type CommandTarget = {state: EditorState, dispatch: (tr: Transaction) => void}
@@ -258,14 +258,14 @@ export const selectDocEnd: StateCommand = ({state, dispatch}) => {
 
 /// Select the entire document.
 export const selectAll: StateCommand = ({state, dispatch}) => {
-  dispatch(state.update({selection: {anchor: 0, head: state.doc.length}, annotations: Transaction.userEvent.of("keyboardselection")}))
+  dispatch(state.update({selection: {anchor: 0, head: state.doc.length}, userEvent: "select"}))
   return true
 }
 
 /// Expand the selection to cover entire lines.
 export const selectLine: StateCommand = ({state, dispatch}) => {
   let ranges = selectedLineBlocks(state).map(({from, to}) => EditorSelection.range(from, Math.min(to + 1, state.doc.length)))
-  dispatch(state.update({selection: EditorSelection.create(ranges), annotations: Transaction.userEvent.of("keyboardselection")}))
+  dispatch(state.update({selection: EditorSelection.create(ranges), userEvent: "select"}))
   return true
 }
 
@@ -299,17 +299,20 @@ export const simplifySelection: StateCommand = ({state, dispatch}) => {
 }
 
 function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => number) {
+  let event = "delete.selection"
   let changes = state.changeByRange(range => {
     let {from, to} = range
     if (from == to) {
       let towards = by(from)
+      if (towards < from) event = "delete.backward"
+      else if (towards > from) event = "delete.forward"
       from = Math.min(from, towards)
       to = Math.max(to, towards)
     }
     return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from)}
   })
   if (changes.changes.empty) return false
-  dispatch(state.update(changes, {scrollIntoView: true, annotations: Transaction.userEvent.of("delete")}))
+  dispatch(state.update(changes, {scrollIntoView: true, userEvent: event}))
   return true
 }
 
@@ -400,7 +403,7 @@ export const deleteTrailingWhitespace: StateCommand = ({state, dispatch}) => {
     pos += iter.value.length
   }
   if (!changes.length) return false
-  dispatch(state.update({changes}))
+  dispatch(state.update({changes, userEvent: "delete"}))
   return true
 }
 
@@ -411,7 +414,7 @@ export const splitLine: StateCommand = ({state, dispatch}) => {
     return {changes: {from: range.from, to: range.to, insert: Text.of(["", ""])},
             range: EditorSelection.cursor(range.from)}
   })
-  dispatch(state.update(changes, {scrollIntoView: true, annotations: Transaction.userEvent.of("input")}))
+  dispatch(state.update(changes, {scrollIntoView: true, userEvent: "input"}))
   return true
 }
 
@@ -426,7 +429,7 @@ export const transposeChars: StateCommand = ({state, dispatch}) => {
             range: EditorSelection.cursor(to)}
   })
   if (changes.changes.empty) return false
-  dispatch(state.update(changes, {scrollIntoView: true}))
+  dispatch(state.update(changes, {scrollIntoView: true, userEvent: "move.character"}))
   return true
 }
 
@@ -469,7 +472,8 @@ function moveLine(state: EditorState, dispatch: (tr: Transaction) => void, forwa
   dispatch(state.update({
     changes,
     scrollIntoView: true,
-    selection: EditorSelection.create(ranges, state.selection.mainIndex)
+    selection: EditorSelection.create(ranges, state.selection.mainIndex),
+    userEvent: "move.line"
   }))
   return true
 }
@@ -487,7 +491,7 @@ function copyLine(state: EditorState, dispatch: (tr: Transaction) => void, forwa
     else
       changes.push({from: block.to, insert: state.lineBreak + state.doc.slice(block.from, block.to)})
   }
-  dispatch(state.update({changes, scrollIntoView: true}))
+  dispatch(state.update({changes, scrollIntoView: true, userEvent: "input.copyline"}))
   return true
 }
 
@@ -504,13 +508,13 @@ export const deleteLine: Command = view => {
     return {from, to}
   }))
   let selection = updateSel(state.selection, range => view.moveVertically(range, true)).map(changes)
-  view.dispatch({changes, selection, scrollIntoView: true})
+  view.dispatch({changes, selection, scrollIntoView: true, userEvent: "delete.line"})
   return true
 }
 
 /// Replace the selection with a newline.
 export const insertNewline: StateCommand = ({state, dispatch}) => {
-  dispatch(state.update(state.replaceSelection(state.lineBreak), {scrollIntoView: true}))
+  dispatch(state.update(state.replaceSelection(state.lineBreak), {scrollIntoView: true, userEvent: "input"}))
   return true
 }
 
@@ -546,7 +550,7 @@ export const insertNewlineAndIndent: StateCommand = ({state, dispatch}): boolean
     return {changes: {from, to, insert: Text.of(insert)},
             range: EditorSelection.cursor(from + 1 + insert[1].length)}
   })
-  dispatch(state.update(changes, {scrollIntoView: true}))
+  dispatch(state.update(changes, {scrollIntoView: true, userEvent: "input"}))
   return true
 }
 
@@ -587,7 +591,7 @@ export const indentSelection: StateCommand = ({state, dispatch}) => {
       changes.push({from: line.from, to: line.from + cur.length, insert: norm})
     }
   })
-  if (!changes.changes!.empty) dispatch(state.update(changes))
+  if (!changes.changes!.empty) dispatch(state.update(changes, {userEvent: "indent"}))
   return true
 }
 
@@ -596,7 +600,7 @@ export const indentSelection: StateCommand = ({state, dispatch}) => {
 export const indentMore: StateCommand = ({state, dispatch}) => {
   dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
     changes.push({from: line.from, insert: state.facet(indentUnit)})
-  })))
+  }), {userEvent: "indent"}))
   return true
 }
 
@@ -610,7 +614,7 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
     let insert = indentString(state, Math.max(0, col - getIndentUnit(state)))
     while (keep < space.length && keep < insert.length && space.charCodeAt(keep) == insert.charCodeAt(keep)) keep++
     changes.push({from: line.from + keep, to: line.from + space.length, insert: insert.slice(keep)})
-  })))
+  }), {userEvent: "indent"}))
   return true
 }
 
@@ -619,7 +623,7 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
 /// selection.
 export const insertTab: StateCommand = ({state, dispatch}) => {
   if (state.selection.ranges.some(r => !r.empty)) return indentMore({state, dispatch})
-  dispatch(state.update(state.replaceSelection("\t"), {scrollIntoView: true, annotations: Transaction.userEvent.of("input")}))
+  dispatch(state.update(state.replaceSelection("\t"), {scrollIntoView: true, userEvent: "input"}))
   return true
 }
 
