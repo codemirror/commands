@@ -321,7 +321,7 @@ const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(targe
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
-    let col = countColumn(before, 0, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state)
+    let col = countColumn(before, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state)
     for (let i = 0; i < drop && before[before.length - 1 - i] == " "; i++) pos--
     targetPos = pos
   } else {
@@ -610,7 +610,7 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
   dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
     let space = /^\s*/.exec(line.text)![0]
     if (!space) return
-    let col = countColumn(space, 0, state.tabSize), keep = 0
+    let col = countColumn(space, state.tabSize), keep = 0
     let insert = indentString(state, Math.max(0, col - getIndentUnit(state)))
     while (keep < space.length && keep < insert.length && space.charCodeAt(keep) == insert.charCodeAt(keep)) keep++
     changes.push({from: line.from + keep, to: line.from + space.length, insert: insert.slice(keep)})
