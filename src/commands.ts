@@ -542,11 +542,11 @@ export const insertNewlineAndIndent: StateCommand = ({state, dispatch}): boolean
     if (indent == null) indent = /^\s*/.exec(state.doc.lineAt(from).text)![0].length
 
     let line = state.doc.lineAt(from)
-    while (to < line.to && /\s/.test(line.text.slice(to - line.from, to + 1 - line.from))) to++
+    while (to < line.to && /\s/.test(line.text[to - line.from])) to++
     if (explode) ({from, to} = explode)
     else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from))) from = line.from
     let insert = ["", indentString(state, indent)]
-    if (explode) insert.push(indentString(state, cx.lineIndent(line)))
+    if (explode) insert.push(indentString(state, cx.lineIndent(line.from, -1)))
     return {changes: {from, to, insert: Text.of(insert)},
             range: EditorSelection.cursor(from + 1 + insert[1].length)}
   })
