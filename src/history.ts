@@ -302,11 +302,12 @@ class HistoryState {
 
   addChanges(event: HistEvent, time: number, userEvent: string | undefined, newGroupDelay: number, maxLen: number): HistoryState {
     let done = this.done, lastEvent = done[done.length - 1]
-    if (lastEvent && lastEvent.changes &&
-        time - this.prevTime < newGroupDelay &&
-        !lastEvent.selectionsAfter.length &&
-        !lastEvent.changes.empty && event.changes &&
-        isAdjacent(lastEvent.changes, event.changes)) {
+    if (lastEvent && lastEvent.changes && !lastEvent.changes.empty && event.changes &&
+        ((!lastEvent.selectionsAfter.length &&
+          time - this.prevTime < newGroupDelay &&
+          isAdjacent(lastEvent.changes, event.changes)) ||
+         // For compose (but not compose.start) events, always join with previous event
+         userEvent == "input.type.compose")) {
       done = updateBranch(done, done.length - 1, maxLen,
                           new HistEvent(event.changes.compose(lastEvent.changes), conc(event.effects, lastEvent.effects),
                                         lastEvent.mapped, lastEvent.startSelection, none))
@@ -320,7 +321,7 @@ class HistoryState {
     let last = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none
     if (last.length > 0 &&
         time - this.prevTime < newGroupDelay &&
-        userEvent && userEvent == this.prevUserEvent && /^select($|\.)/.test(userEvent) &&
+        userEvent == this.prevUserEvent && userEvent && /^select($|\.)/.test(userEvent) &&
         eqSelectionShape(last[last.length - 1], selection))
       return this
     return new HistoryState(addSelection(this.done, selection), this.undone, time, userEvent)

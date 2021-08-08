@@ -352,9 +352,9 @@ describe("history", () => {
     it("merges selection-only transactions from keyboard", () => {
       let state = mkState(undefined, "abc")
       ist(state.selection.main.head, 0)
-      state = state.update({selection: {anchor: 2}, annotations: Transaction.userEvent.of("keyboardselection")}).state
-      state = state.update({selection: {anchor: 3}, annotations: Transaction.userEvent.of("keyboardselection")}).state
-      state = state.update({selection: {anchor: 1}, annotations: Transaction.userEvent.of("keyboardselection")}).state
+      state = state.update({selection: {anchor: 2}, userEvent: "select"}).state
+      state = state.update({selection: {anchor: 3}, userEvent: "select"}).state
+      state = state.update({selection: {anchor: 1}, userEvent: "select"}).state
       state = command(state, undoSelection)
       ist(state.selection.main.head, 0)
     })
@@ -376,10 +376,10 @@ describe("history", () => {
     it("doesn't merge selection-only transactions if they change the number of selections", () => {
       let state = mkState(undefined, "abc")
       ist(state.selection.main.head, 0)
-      state = state.update({selection: {anchor: 2}, annotations: Transaction.userEvent.of("keyboardselection")}).state
+      state = state.update({selection: {anchor: 2}, userEvent: "select"}).state
       state = state.update({selection: EditorSelection.create([EditorSelection.cursor(1), EditorSelection.cursor(3)]),
-                        annotations: Transaction.userEvent.of("keyboardselection")}).state
-      state = state.update({selection: {anchor: 1}, annotations: Transaction.userEvent.of("keyboardselection")}).state
+                            userEvent: "select"}).state
+      state = state.update({selection: {anchor: 1}, userEvent: "select"}).state
       state = command(state, undoSelection)
       ist(state.selection.ranges.length, 2)
       state = command(state, undoSelection)
@@ -389,9 +389,9 @@ describe("history", () => {
     it("doesn't merge selection-only transactions if a selection changes empty state", () => {
       let state = mkState(undefined, "abc")
       ist(state.selection.main.head, 0)
-      state = state.update({selection: {anchor: 2}, annotations: Transaction.userEvent.of("keyboardselection")}).state
-      state = state.update({selection: {anchor: 2, head: 3}, annotations: Transaction.userEvent.of("keyboardselection")}).state
-      state = state.update({selection: {anchor: 1}, annotations: Transaction.userEvent.of("keyboardselection")}).state
+      state = state.update({selection: {anchor: 2}, userEvent: "select"}).state
+      state = state.update({selection: {anchor: 2, head: 3}, userEvent: "select"}).state
+      state = state.update({selection: {anchor: 1}, userEvent: "select"}).state
       state = command(state, undoSelection)
       ist(state.selection.main.anchor, 2)
       ist(state.selection.main.head, 3)
