@@ -781,9 +781,9 @@ export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Shift-Mod-\\", run: cursorMatchingBracket}
 ] as readonly KeyBinding[]).concat(standardKeymap)
 
-/// A binding that binds Tab to [`insertTab`](#commands.insertTab) and
-/// Shift-Tab to [`indentSelection`](#commands.indentSelection).
+/// A binding that binds Tab to [`indentMore`](#commands.indentMore) and
+/// Shift-Tab to [`indentLess`](#commands.indentLess).
 /// Please see the [Tab example](../../examples/tab/) before using
 /// this.
-export const defaultTabBinding: KeyBinding =
-  {key: "Tab", run: insertTab, shift: indentSelection}
+export const indentWithTab: KeyBinding =
+  {key: "Tab", run: indentMore, shift: indentLess}

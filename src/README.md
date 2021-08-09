@@ -9,7 +9,7 @@ with key bindings for a lot of them.
 
 @emacsStyleKeymap
 
-@defaultTabBinding
+@indentWithTab
 
 ### Selection
 
