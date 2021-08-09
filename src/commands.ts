@@ -66,7 +66,7 @@ function interestingNode(state: EditorState, node: SyntaxNode, bracketProp: Node
 }
 
 function moveBySyntax(state: EditorState, start: SelectionRange, forward: boolean) {
-  let pos = syntaxTree(state).resolve(start.head)
+  let pos = syntaxTree(state).resolveInner(start.head)
   let bracketProp = forward ? NodeProp.closedBy : NodeProp.openedBy
   // Scan forward through child nodes to see if there's an interesting
   // node ahead.
@@ -275,7 +275,7 @@ export const selectLine: StateCommand = ({state, dispatch}) => {
 /// syntax tree.
 export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
   let selection = updateSel(state.selection, range => {
-    let context = syntaxTree(state).resolve(range.head, 1)
+    let context = syntaxTree(state).resolveInner(range.head, 1)
     while (!((context.from < range.from && context.to >= range.to) ||
              (context.to > range.to && context.from <= range.from) ||
              !context.parent?.parent))
@@ -520,7 +520,7 @@ export const insertNewline: StateCommand = ({state, dispatch}) => {
 
 function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: number} | null {
   if (/\(\)|\[\]|\{\}/.test(state.sliceDoc(pos - 1, pos + 1))) return {from: pos, to: pos}
-  let context = syntaxTree(state).resolve(pos)
+  let context = syntaxTree(state).resolveInner(pos)
   let before = context.childBefore(pos), after = context.childAfter(pos), closedBy
   if (before && after && before.to <= pos && after.from >= pos &&
       (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 &&
