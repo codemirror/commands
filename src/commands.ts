@@ -584,6 +584,7 @@ export const indentSelection: StateCommand = ({state, dispatch}) => {
   let changes = changeBySelectedLine(state, (line, changes, range) => {
     let indent = getIndentation(context, line.from)
     if (indent == null) return
+    if (!/\S/.test(line.text)) indent = 0
     let cur = /^\s*/.exec(line.text)![0]
     let norm = indentString(state, indent)
     if (cur != norm || range.from < line.from + cur.length) {
