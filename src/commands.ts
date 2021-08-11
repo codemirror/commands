@@ -601,7 +601,7 @@ export const indentSelection: StateCommand = ({state, dispatch}) => {
 export const indentMore: StateCommand = ({state, dispatch}) => {
   dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
     changes.push({from: line.from, insert: state.facet(indentUnit)})
-  }), {userEvent: "indent"}))
+  }), {userEvent: "input.indent"}))
   return true
 }
 
@@ -615,7 +615,7 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
     let insert = indentString(state, Math.max(0, col - getIndentUnit(state)))
     while (keep < space.length && keep < insert.length && space.charCodeAt(keep) == insert.charCodeAt(keep)) keep++
     changes.push({from: line.from + keep, to: line.from + space.length, insert: insert.slice(keep)})
-  }), {userEvent: "indent"}))
+  }), {userEvent: "delete.dedent"}))
   return true
 }
 
