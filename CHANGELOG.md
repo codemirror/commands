@@ -1,3 +1,23 @@
+## 0.19.0 (2021-08-11)
+
+### Breaking changes
+
+Change default binding for backspace to `deleteCharBackward`, drop `deleteCodePointBackward`/`Forward` from the library.
+
+`defaultTabBinding` was removed.
+
+### Bug fixes
+
+Drop Alt-d, Alt-f, and Alt-b bindings from `emacsStyleKeymap` (and thus from the default macOS bindings).
+
+`deleteCharBackward` and `deleteCharForward` now take atomic ranges into account.
+
+### New features
+
+Attach more granular user event strings to transactions.
+
+The module exports a new binding `indentWithTab` that binds tab and shift-tab to `indentMore` and `indentLess`.
+
 ## 0.18.3 (2021-06-11)
 
 ### Bug fixes
