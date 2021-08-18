@@ -88,9 +88,10 @@ export function history(config: HistoryConfig = {}): Extension {
     historyConfig.of(config),
     EditorView.domEventHandlers({
       beforeinput(e, view) {
-        if (e.inputType == "historyUndo") return undo(view)
-        if (e.inputType == "historyRedo") return redo(view)
-        return false
+        let command = e.inputType == "historyUndo" ? undo : e.inputType == "historyRedo" ? redo : null
+        if (!command) return false
+        e.preventDefault()
+        return command(view)
       }
     })
   ]
