@@ -51,6 +51,14 @@ with key bindings for a lot of them.
 
 @selectGroupBackward
 
+@cursorSubwordForward
+
+@selectSubwordForward
+
+@cursorSubwordBackward
+
+@selectSubwordBackward
+
 #### Vertical motion
 
 @cursorLineUp

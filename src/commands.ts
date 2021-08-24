@@ -48,8 +48,8 @@ function cursorByGroup(view: EditorView, forward: boolean) {
   return moveSel(view, range => range.empty ? view.moveByGroup(range, forward) : rangeEnd(range, forward))
 }
 
-/// Move the selection across one group of word or non-word (but also
-/// non-space) characters.
+/// Move the selection to the left across one group of word or
+/// non-word (but also non-space) characters.
 export const cursorGroupLeft: Command = view => cursorByGroup(view, view.textDirection != Direction.LTR)
 /// Move the selection one group to the right.
 export const cursorGroupRight: Command = view => cursorByGroup(view, view.textDirection == Direction.LTR)
@@ -58,6 +58,46 @@ export const cursorGroupRight: Command = view => cursorByGroup(view, view.textDi
 export const cursorGroupForward: Command = view => cursorByGroup(view, true)
 /// Move the selection one group backward.
 export const cursorGroupBackward: Command = view => cursorByGroup(view, false)
+
+function moveBySubword(view: EditorView, range: SelectionRange, forward: boolean) {
+  let categorize = view.state.charCategorizer(range.from)
+  return view.moveByChar(range, forward, start => {
+    let cat = CharCategory.Space, pos = range.from
+    let done = false, sawUpper = false, sawLower = false
+    let step = (next: string) => {
+      if (done) return false
+      pos += forward ? next.length : -next.length
+      let nextCat = categorize(next), ahead
+      if (cat == CharCategory.Space) cat = nextCat
+      if (cat != nextCat) return false
+      if (cat == CharCategory.Word) {
+        if (next.toLowerCase() == next) {
+          if (!forward && sawUpper) return false
+          sawLower = true
+        } else if (sawLower) {
+          if (forward) return false
+          done = true
+        } else {
+          if (sawUpper && forward && categorize(ahead = view.state.sliceDoc(pos, pos + 1)) == CharCategory.Word &&
+              ahead.toLowerCase() == ahead) return false
+          sawUpper = true
+        }
+      }
+      return true
+    }
+    step(start)
+    return step
+  })
+}
+
+function cursorBySubword(view: EditorView, forward: boolean) {
+  return moveSel(view, range => range.empty ? moveBySubword(view, range, forward) : rangeEnd(range, forward))
+}
+
+/// Move the selection one group or camel-case subword forward.
+export const cursorSubwordForward: Command = view => cursorBySubword(view, true)
+/// Move the selection one group or camel-case subword backward.
+export const cursorSubwordBackward: Command = view => cursorBySubword(view, false)
 
 function interestingNode(state: EditorState, node: SyntaxNode, bracketProp: NodeProp<unknown>) {
   if (node.type.prop(bracketProp)) return true
@@ -196,6 +236,15 @@ export const selectGroupRight: Command = view => selectByGroup(view, view.textDi
 export const selectGroupForward: Command = view => selectByGroup(view, true)
 /// Move the selection head one group backward.
 export const selectGroupBackward: Command = view => selectByGroup(view, false)
+
+function selectBySubword(view: EditorView, forward: boolean) {
+  return extendSel(view, range => moveBySubword(view, range, forward))
+}
+
+/// Move the selection head one group or camel-case subword forward.
+export const selectSubwordForward: Command = view => selectBySubword(view, true)
+/// Move the selection head one group or subword backward.
+export const selectSubwordBackward: Command = view => selectBySubword(view, false)
 
 /// Move the selection head over the next syntactic element to the left.
 export const selectSyntaxLeft: Command =
