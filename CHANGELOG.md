@@ -1,3 +1,9 @@
+## 0.19.2 (2021-08-24)
+
+### New features
+
+New commands `cursorSubwordForward`, `cursorSubwordBackward`, `selectSubwordForward`, and `selectSubwordBackward` which implement motion by camel case subword.
+
 ## 0.19.1 (2021-08-11)
 
 ### Bug fixes
