@@ -132,7 +132,11 @@ export const cursorSyntaxRight: Command =
   view => moveSel(view, range => moveBySyntax(view.state, range, view.textDirection == Direction.LTR))
 
 function cursorByLine(view: EditorView, forward: boolean) {
-  return moveSel(view, range => range.empty ? view.moveVertically(range, forward) : rangeEnd(range, forward))
+  return moveSel(view, range => {
+    if (!range.empty) return rangeEnd(range, forward)
+    let moved = view.moveVertically(range, forward)
+    return moved.head != range.head ? moved : view.moveToLineBoundary(range, forward)
+  })
 }
 
 /// Move the selection one line up.
