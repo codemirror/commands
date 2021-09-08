@@ -111,6 +111,9 @@ describe("commands", () => {
     it("isn't confused by text after the cursor", () =>
        test("{|two", "{\n  |two"))
 
+    it("clears empty lines before the cursor", () =>
+       test("    |", "\n|"))
+
     it("deletes selected text", () =>
        test("{<one>two", "{\n  |two"))
 
