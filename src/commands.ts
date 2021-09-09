@@ -369,8 +369,16 @@ function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => numbe
   return true
 }
 
+function skipAtomic(target: CommandTarget, pos: number, forward: boolean) {
+  if (target instanceof EditorView) for (let ranges of target.pluginField(PluginField.atomicRanges))
+    ranges.between(pos, pos, (from, to) => {
+      if (from < pos && to > pos) pos = forward ? to : from
+    })
+  return pos
+}
+
 const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, pos => {
-  let {state} = target, line = state.doc.lineAt(pos), before, targetPos
+  let {state} = target, line = state.doc.lineAt(pos), before, targetPos: number
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
@@ -382,11 +390,7 @@ const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(targe
     if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
       targetPos += forward ? 1 : -1
   }
-  if (target instanceof EditorView) for (let ranges of target.pluginField(PluginField.atomicRanges))
-    ranges.between(targetPos, targetPos, (from, to) => {
-      targetPos = forward ? to : from
-    })
-  return targetPos
+  return skipAtomic(target, targetPos, forward)
 })
 
 /// Delete the selection, or, for cursor selections, the character
@@ -411,7 +415,7 @@ const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(targ
     if (nextChar != " " || pos != start) cat = nextCat
     pos = next
   }
-  return pos
+  return skipAtomic(target, pos, forward)
 })
 
 /// Delete the selection or backward until the end of the next
@@ -426,8 +430,7 @@ export const deleteGroupForward: StateCommand = target => deleteByGroup(target, 
 /// line, delete the line break after it.
 export const deleteToLineEnd: Command = view => deleteBy(view, pos => {
   let lineEnd = view.visualLineAt(pos).to
-  if (pos < lineEnd) return lineEnd
-  return Math.min(view.state.doc.length, pos + 1)
+  return skipAtomic(view, pos < lineEnd ? lineEnd : Math.min(view.state.doc.length, pos + 1), true)
 })
 
 /// Delete the selection, or, if it is a cursor selection, delete to
@@ -435,8 +438,7 @@ export const deleteToLineEnd: Command = view => deleteBy(view, pos => {
 /// line, delete the line break before it.
 export const deleteToLineStart: Command = view => deleteBy(view, pos => {
   let lineStart = view.visualLineAt(pos).from
-  if (pos > lineStart) return lineStart
-  return Math.max(0, pos - 1)
+  return skipAtomic(view, pos > lineStart ? lineStart : Math.max(0, pos - 1), false)
 })
 
 /// Delete all whitespace directly before a line end from the
