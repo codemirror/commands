@@ -1,3 +1,11 @@
+## 0.19.3 (2021-09-09)
+
+### Bug fixes
+
+Make by-line cursor motion commands move the cursor to the start/end of the document when they hit the first/last line.
+
+Fix a bug where `deleteCharForward`/`Backward` behaved incorrectly when deleting directly before or after an atomic range.
+
 ## 0.19.2 (2021-08-24)
 
 ### New features
