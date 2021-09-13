@@ -352,6 +352,7 @@ export const simplifySelection: StateCommand = ({state, dispatch}) => {
 }
 
 function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => number) {
+  if (state.readOnly) return false
   let event = "delete.selection"
   let changes = state.changeByRange(range => {
     let {from, to} = range
@@ -444,6 +445,7 @@ export const deleteToLineStart: Command = view => deleteBy(view, pos => {
 /// Delete all whitespace directly before a line end from the
 /// document.
 export const deleteTrailingWhitespace: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   let changes = []
   for (let pos = 0, prev = "", iter = state.doc.iter();;) {
     iter.next()
@@ -465,6 +467,7 @@ export const deleteTrailingWhitespace: StateCommand = ({state, dispatch}) => {
 /// Replace each selection range with a line break, leaving the cursor
 /// on the line before the break.
 export const splitLine: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   let changes = state.changeByRange(range => {
     return {changes: {from: range.from, to: range.to, insert: Text.of(["", ""])},
             range: EditorSelection.cursor(range.from)}
@@ -475,6 +478,7 @@ export const splitLine: StateCommand = ({state, dispatch}) => {
 
 /// Flip the characters before and after the cursor(s).
 export const transposeChars: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   let changes = state.changeByRange(range => {
     if (!range.empty || range.from == 0 || range.from == state.doc.length) return {range}
     let pos = range.from, line = state.doc.lineAt(pos)
@@ -506,6 +510,7 @@ function selectedLineBlocks(state: EditorState) {
 }
 
 function moveLine(state: EditorState, dispatch: (tr: Transaction) => void, forward: boolean): boolean {
+  if (state.readOnly) return false
   let changes = [], ranges = []
   for (let block of selectedLineBlocks(state)) {
     if (forward ? block.to == state.doc.length : block.from == 0) continue
@@ -539,6 +544,7 @@ export const moveLineUp: StateCommand = ({state, dispatch}) => moveLine(state, d
 export const moveLineDown: StateCommand = ({state, dispatch}) => moveLine(state, dispatch, true)
 
 function copyLine(state: EditorState, dispatch: (tr: Transaction) => void, forward: boolean): boolean {
+  if (state.readOnly) return false
   let changes = []
   for (let block of selectedLineBlocks(state)) {
     if (forward)
@@ -557,6 +563,7 @@ export const copyLineDown: StateCommand = ({state, dispatch}) => copyLine(state,
 
 /// Delete selected lines.
 export const deleteLine: Command = view => {
+  if (view.state.readOnly) return false
   let {state} = view, changes = state.changes(selectedLineBlocks(state).map(({from, to}) => {
     if (from > 0) from--
     else if (to < state.doc.length) to++
@@ -590,6 +597,7 @@ function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: 
 /// matching brackets, an additional newline will be inserted after
 /// the cursor.
 export const insertNewlineAndIndent: StateCommand = ({state, dispatch}): boolean => {
+  if (state.readOnly) return false
   let changes = state.changeByRange(({from, to}) => {
     let explode = from == to && isBetweenBrackets(state, from)
     let cx = new IndentContext(state, {simulateBreak: from, simulateDoubleBreak: !!explode})
@@ -631,6 +639,7 @@ function changeBySelectedLine(state: EditorState, f: (line: Line, changes: Chang
 /// facet](#language.indentService) as source for auto-indent
 /// information.
 export const indentSelection: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   let updated: {[lineStart: number]: number} = Object.create(null)
   let context = new IndentContext(state, {overrideIndentation: start => {
     let found = updated[start]
@@ -654,6 +663,7 @@ export const indentSelection: StateCommand = ({state, dispatch}) => {
 /// Add a [unit](#language.indentUnit) of indentation to all selected
 /// lines.
 export const indentMore: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
     changes.push({from: line.from, insert: state.facet(indentUnit)})
   }), {userEvent: "input.indent"}))
@@ -663,6 +673,7 @@ export const indentMore: StateCommand = ({state, dispatch}) => {
 /// Remove a [unit](#language.indentUnit) of indentation from all
 /// selected lines.
 export const indentLess: StateCommand = ({state, dispatch}) => {
+  if (state.readOnly) return false
   dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
     let space = /^\s*/.exec(line.text)![0]
     if (!space) return
