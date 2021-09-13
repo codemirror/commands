@@ -106,6 +106,7 @@ export const historyField = historyField_ as StateField<unknown>
 
 function cmd(side: BranchName, selection: boolean): StateCommand {
   return function({state, dispatch}: {state: EditorState, dispatch: (tr: Transaction) => void}) {
+    if (!selection && state.readOnly) return false
     let historyState = state.field(historyField_, false)
     if (!historyState) return false
     let tr = historyState.pop(side, state, selection)
