@@ -24,6 +24,7 @@ function command(f: (option: CommentOption, ranges: readonly {readonly from: num
                      state: EditorState) => TransactionSpec | null,
                  option: CommentOption): StateCommand {
   return ({state, dispatch}) => {
+    if (state.readOnly) return false
     let tr = f(option, state.selection.ranges, state)
     if (!tr) return false
     dispatch(state.update(tr))
