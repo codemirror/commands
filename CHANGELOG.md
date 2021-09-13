@@ -1,3 +1,9 @@
+## 0.19.4 (2021-09-13)
+
+### Bug fixes
+
+Make commands that affect the editor's content check `state.readOnly` and return false when that is true.
+
 ## 0.19.3 (2021-09-09)
 
 ### Bug fixes
