@@ -596,25 +596,33 @@ function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: 
 /// will also delete that whitespace. When the cursor is between
 /// matching brackets, an additional newline will be inserted after
 /// the cursor.
-export const insertNewlineAndIndent: StateCommand = ({state, dispatch}): boolean => {
-  if (state.readOnly) return false
-  let changes = state.changeByRange(({from, to}) => {
-    let explode = from == to && isBetweenBrackets(state, from)
-    let cx = new IndentContext(state, {simulateBreak: from, simulateDoubleBreak: !!explode})
-    let indent = getIndentation(cx, from)
-    if (indent == null) indent = /^\s*/.exec(state.doc.lineAt(from).text)![0].length
+export const insertNewlineAndIndent = newlineAndIndent(false)
 
-    let line = state.doc.lineAt(from)
-    while (to < line.to && /\s/.test(line.text[to - line.from])) to++
-    if (explode) ({from, to} = explode)
-    else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from))) from = line.from
-    let insert = ["", indentString(state, indent)]
-    if (explode) insert.push(indentString(state, cx.lineIndent(line.from, -1)))
-    return {changes: {from, to, insert: Text.of(insert)},
-            range: EditorSelection.cursor(from + 1 + insert[1].length)}
-  })
-  dispatch(state.update(changes, {scrollIntoView: true, userEvent: "input"}))
-  return true
+/// Create a blank, indented line below the current line.
+export const insertBlankLine = newlineAndIndent(true)
+
+function newlineAndIndent(atEof: boolean): StateCommand {
+  return ({state, dispatch}): boolean => {
+    if (state.readOnly) return false
+    let changes = state.changeByRange(range => {
+      let {from, to} = range, line = state.doc.lineAt(from)
+      let explode = !atEof && from == to && isBetweenBrackets(state, from)
+      if (atEof) from = to = (to <= line.to ? line : state.doc.lineAt(to)).to
+      let cx = new IndentContext(state, {simulateBreak: from, simulateDoubleBreak: !!explode})
+      let indent = getIndentation(cx, from)
+      if (indent == null) indent = /^\s*/.exec(state.doc.lineAt(from).text)![0].length
+
+      while (to < line.to && /\s/.test(line.text[to - line.from])) to++
+      if (explode) ({from, to} = explode)
+      else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from))) from = line.from
+      let insert = ["", indentString(state, indent)]
+      if (explode) insert.push(indentString(state, cx.lineIndent(line.from, -1)))
+      return {changes: {from, to, insert: Text.of(insert)},
+              range: EditorSelection.cursor(from + 1 + insert[1].length)}
+    })
+    dispatch(state.update(changes, {scrollIntoView: true, userEvent: "input"}))
+    return true
+  }
 }
 
 function changeBySelectedLine(state: EditorState, f: (line: Line, changes: ChangeSpec[], range: SelectionRange) => void) {
@@ -817,6 +825,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Shift-Alt-ArrowUp: [`copyLineUp`](#commands.copyLineUp)
 /// - Shift-Alt-ArrowDown: [`copyLineDown`](#commands.copyLineDown)
 /// - Escape: [`simplifySelection`](#commands.simplifySelection)
+/// - Ctrl-Enter (Comd-Enter on macOS): [`insertBlankLine`](#commands.insertBlankLine)
 /// - Alt-l (Ctrl-l on macOS): [`selectLine`](#commands.selectLine)
 /// - Ctrl-i (Cmd-i on macOS): [`selectParentSyntax`](#commands.selectParentSyntax)
 /// - Ctrl-[ (Cmd-[ on macOS): [`indentLess`](#commands.indentLess)
@@ -835,6 +844,7 @@ export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Shift-Alt-ArrowDown", run: copyLineDown},
 
   {key: "Escape", run: simplifySelection},
+  {key: "Mod-Enter", run: insertBlankLine},
 
   {key: "Alt-l", mac: "Ctrl-l", run: selectLine},
   {key: "Mod-i", run: selectParentSyntax, preventDefault: true},

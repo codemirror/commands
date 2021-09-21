@@ -172,3 +172,5 @@ with key bindings for a lot of them.
 @insertNewline
 
 @insertNewlineAndIndent
+
+@insertBlankLine
