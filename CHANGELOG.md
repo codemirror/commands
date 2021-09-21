@@ -1,3 +1,9 @@
+## 0.19.5 (2021-09-21)
+
+### New features
+
+Adds an `insertBlankLine` command which creates an empty line below the selection, and binds it to Mod-Enter in the default keymap.
+
 ## 0.19.4 (2021-09-13)
 
 ### Bug fixes
