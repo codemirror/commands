@@ -808,7 +808,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
   {key: "Mod-a", run: selectAll},
 
   {key: "Backspace", run: deleteCharBackward, shift: deleteCharBackward},
-  {key: "Delete", run: deleteCharForward, shift: deleteCharForward},
+  {key: "Delete", run: deleteCharForward},
   {key: "Mod-Backspace", mac: "Alt-Backspace", run: deleteGroupBackward},
   {key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward},
   {mac: "Mod-Backspace", run: deleteToLineStart},
