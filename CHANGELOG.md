@@ -1,3 +1,9 @@
+## 0.19.6 (2021-12-10)
+
+### Bug fixes
+
+The standard keymap no longer overrides Shift-Delete, in order to allow the native behavior of that key to happen on platforms that support it.
+
 ## 0.19.5 (2021-09-21)
 
 ### New features
