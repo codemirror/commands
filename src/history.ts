@@ -343,7 +343,8 @@ class HistoryState {
       return state.update({
         selection: event.selectionsAfter[event.selectionsAfter.length - 1],
         annotations: fromHistory.of({side, rest: popSelection(branch)}),
-        userEvent: side == BranchName.Done ? "select.undo" : "select.redo"
+        userEvent: side == BranchName.Done ? "select.undo" : "select.redo",
+        scrollIntoView: true
       })
     } else if (!event.changes) {
       return null
@@ -356,7 +357,8 @@ class HistoryState {
         effects: event.effects,
         annotations: fromHistory.of({side, rest}),
         filter: false,
-        userEvent: side == BranchName.Done ? "undo" : "redo"
+        userEvent: side == BranchName.Done ? "undo" : "redo",
+        scrollIntoView: true
       })
     }
   }
