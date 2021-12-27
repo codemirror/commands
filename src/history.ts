@@ -292,6 +292,8 @@ function mapEvent(event: HistEvent, mapping: ChangeDesc,
                        fullMapping, event.startSelection!.map(before), selections)
 }
 
+const joinableUserEvent = /^(input\.type|delete)($|\.)/
+
 class HistoryState {
   constructor(public readonly done: Branch,
               public readonly undone: Branch,
@@ -305,6 +307,7 @@ class HistoryState {
   addChanges(event: HistEvent, time: number, userEvent: string | undefined, newGroupDelay: number, maxLen: number): HistoryState {
     let done = this.done, lastEvent = done[done.length - 1]
     if (lastEvent && lastEvent.changes && !lastEvent.changes.empty && event.changes &&
+        (!userEvent || joinableUserEvent.test(userEvent)) &&
         ((!lastEvent.selectionsAfter.length &&
           time - this.prevTime < newGroupDelay &&
           isAdjacent(lastEvent.changes, event.changes)) ||
