@@ -717,8 +717,6 @@ export const insertTab: StateCommand = ({state, dispatch}) => {
 ///  - Ctrl-Alt-h: [`deleteGroupBackward`](#commands.deleteGroupBackward)
 ///  - Ctrl-o: [`splitLine`](#commands.splitLine)
 ///  - Ctrl-t: [`transposeChars`](#commands.transposeChars)
-///  - Alt-<: [`cursorDocStart`](#commands.cursorDocStart)
-///  - Alt->: [`cursorDocEnd`](#commands.cursorDocEnd)
 ///  - Ctrl-v: [`cursorPageDown`](#commands.cursorPageDown)
 ///  - Alt-v: [`cursorPageUp`](#commands.cursorPageUp)
 export const emacsStyleKeymap: readonly KeyBinding[] = [
@@ -738,9 +736,6 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 
   {key: "Ctrl-o", run: splitLine},
   {key: "Ctrl-t", run: transposeChars},
-
-  {key: "Alt-<", run: cursorDocStart},
-  {key: "Alt->", run: cursorDocEnd},
 
   {key: "Ctrl-v", run: cursorPageDown},
   {key: "Alt-v", run: cursorPageUp},
