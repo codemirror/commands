@@ -61,8 +61,17 @@ describe("history", () => {
     ist(state.doc.toString(), "newtext")
   })
 
+  it("puts the cursor after the change on redo", () => {
+    let state = mkState({}, "one\n\ntwo")
+    state = state.update({changes: {from: 3, insert: "!"}}).state
+    state = state.update({selection: {anchor: state.doc.length}}).state
+    state = command(state, undo)
+    state = command(state, redo)
+    ist(state.selection.main.head, 4)
+  })
+
   it("tracks multiple levels of history", () => {
-    let state = mkState([], "one")
+    let state = mkState({}, "one")
     state = type(state, "new")
     state = type(state, "text")
     state = type(state, "some", 0)
