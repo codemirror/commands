@@ -1,3 +1,11 @@
+## 0.19.7 (2022-01-11)
+
+### Bug fixes
+
+Don't bind Alt-\< and Alt-> on macOS by default, since those interfere with some keyboard layouts. Make cursorPageUp/Down scroll the view to keep the cursor in place
+
+`cursorPageUp` and `cursorPageDown` now scroll the view by the amount that the cursor moved.
+
 ## 0.19.6 (2021-12-10)
 
 ### Bug fixes
