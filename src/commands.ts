@@ -398,7 +398,7 @@ const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(targe
     for (let i = 0; i < drop && before[before.length - 1 - i] == " "; i++) pos--
     targetPos = pos
   } else {
-    targetPos = findClusterBreak(line.text, pos - line.from, forward) + line.from
+    targetPos = findClusterBreak(line.text, pos - line.from, forward, forward) + line.from
     if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
       targetPos += forward ? 1 : -1
   }
