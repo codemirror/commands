@@ -1,3 +1,11 @@
+## 0.19.8 (2022-01-26)
+
+### Bug fixes
+
+`deleteCharBackward` now removes extending characters one at a time, rather than deleting the entire glyph at once.
+
+Alt-v is no longer bound in `emacsStyleKeymap` and macOS's `standardKeymap`, because macOS doesn't bind it by default and it conflicts with some keyboard layouts.
+
 ## 0.19.7 (2022-01-11)
 
 ### Bug fixes
