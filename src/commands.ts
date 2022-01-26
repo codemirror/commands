@@ -749,7 +749,6 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
   {key: "Ctrl-t", run: transposeChars},
 
   {key: "Ctrl-v", run: cursorPageDown},
-  {key: "Alt-v", run: cursorPageUp},
 ]
 
 /// An array of key bindings closely sticking to platform-standard or
