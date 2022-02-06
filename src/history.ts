@@ -130,10 +130,10 @@ export const undo = cmd(BranchName.Done, false)
 /// available.
 export const redo = cmd(BranchName.Undone, false)
 
-/// Undo a selection change.
+/// Undo a change or selection change.
 export const undoSelection = cmd(BranchName.Done, true)
 
-/// Redo a selection change.
+/// Redo a change or selection change.
 export const redoSelection = cmd(BranchName.Undone, true)
 
 function depth(side: BranchName) {
