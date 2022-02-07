@@ -146,16 +146,17 @@ export const cursorLineDown: Command = view => cursorByLine(view, true)
 
 function cursorByPage(view: EditorView, forward: boolean) {
   let {state} = view, selection = updateSel(state.selection, range => {
-    return range.empty ? view.moveVertically(range, forward, view.dom.clientHeight) : rangeEnd(range, forward)
+    return range.empty ? view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight))
+      : rangeEnd(range, forward)
   })
   if (selection.eq(state.selection)) return false
   let startPos = view.coordsAtPos(state.selection.main.head)
   let scrollRect = view.scrollDOM.getBoundingClientRect()
-  view.dispatch(setSel(state, selection), {
-    effects: startPos && startPos.top > scrollRect.top && startPos.bottom < scrollRect.bottom
-      ? EditorView.scrollIntoView(selection.main.head, {y: "start", yMargin: startPos.top - scrollRect.top})
-      : undefined
-  })
+  let effect
+  if (startPos && startPos.top > scrollRect.top && startPos.bottom < scrollRect.bottom &&
+      startPos.top - scrollRect.top <= view.scrollDOM.scrollHeight - view.scrollDOM.scrollTop - view.scrollDOM.clientHeight)
+    effect = EditorView.scrollIntoView(selection.main.head, {y: "start", yMargin: startPos.top - scrollRect.top})
+  view.dispatch(setSel(state, selection), {effects: effect})
   return true
 }
 
@@ -278,7 +279,7 @@ export const selectLineUp: Command = view => selectByLine(view, false)
 export const selectLineDown: Command = view => selectByLine(view, true)
 
 function selectByPage(view: EditorView, forward: boolean) {
-  return extendSel(view, range => view.moveVertically(range, forward, view.dom.clientHeight))
+  return extendSel(view, range => view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight)))
 }
 
 /// Move the selection head one page up.
