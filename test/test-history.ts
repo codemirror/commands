@@ -452,7 +452,7 @@ describe("history", () => {
       state = state.update({selection: {anchor: 0, head: 2}}).state
       state = receive(state, "oops", 0)
       state = receive(state, "!", 9)
-      ist(state.selection.eq(EditorSelection.single(0, 6)))
+      ist(state.selection.eq(EditorSelection.single(4, 6)))
       state = command(state, undoSelection)
       ist(state.doc.toString(), "oopshello!")
       ist(state.selection.eq(selection))
