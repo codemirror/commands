@@ -1,5 +1,5 @@
 import {Line} from "@codemirror/text"
-import {EditorState, TransactionSpec, EditorSelection, StateCommand} from "@codemirror/state"
+import {EditorState, TransactionSpec, StateCommand} from "@codemirror/state"
 import {KeyBinding} from "@codemirror/view"
 
 /// An object of this type can be provided as [language
@@ -17,15 +17,14 @@ export interface CommentTokens {
 /// if available, otherwise falling back to block comments.
 export const toggleComment: StateCommand = target => {
   let config = getConfig(target.state)
-  return config.line ? toggleLineComment(target) : config.block ? toggleBlockComment(target) : false
+  return config.line ? toggleLineComment(target) : config.block ? toggleBlockCommentByLine(target) : false
 }
 
-function command(f: (option: CommentOption, ranges: readonly {readonly from: number, readonly to: number}[],
-                     state: EditorState) => TransactionSpec | null,
+function command(f: (option: CommentOption, state: EditorState) => TransactionSpec | null,
                  option: CommentOption): StateCommand {
   return ({state, dispatch}) => {
     if (state.readOnly) return false
-    let tr = f(option, state.selection.ranges, state)
+    let tr = f(option, state)
     if (!tr) return false
     dispatch(state.update(tr))
     return true
@@ -56,6 +55,11 @@ export const blockComment = command(changeBlockComment, CommentOption.Comment)
 /// Uncomment the current selection using block comments.
 export const blockUncomment = command(changeBlockComment, CommentOption.Uncomment)
 
+/// Comment or uncomment the lines around the current selection using
+/// block comments.
+export const toggleBlockCommentByLine =
+  command((o, s) => changeBlockComment(o, s, selectedLineRanges(s)), CommentOption.Toggle)
+
 /// Default key bindings for this package.
 ///
 ///  - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#comment.toggleComment).
@@ -83,7 +87,9 @@ const SearchMargin = 50
 
 /// Determines if the given range is block-commented in the given
 /// state.
-function findBlockComment(state: EditorState, {open, close}: BlockToken, from: number, to: number): BlockComment | null {
+function findBlockComment(
+  state: EditorState, {open, close}: BlockToken, from: number, to: number
+): BlockComment | null {
   let textBefore = state.sliceDoc(from - SearchMargin, from)
   let textAfter = state.sliceDoc(to, to + SearchMargin)
   let spaceBefore = /\s*$/.exec(textBefore)![0].length, spaceAfter = /^\s*/.exec(textAfter)![0].length
@@ -113,27 +119,33 @@ function findBlockComment(state: EditorState, {open, close}: BlockToken, from: n
   return null
 }
 
+function selectedLineRanges(state: EditorState) {
+  let ranges: {from: number, to: number}[] = []
+  for (let r of state.selection.ranges) {
+    let fromLine = state.doc.lineAt(r.from)
+    let toLine = r.to <= fromLine.to ? fromLine : state.doc.lineAt(r.to)
+    let last = ranges.length - 1
+    if (last >= 0 && ranges[last].to > fromLine.from) ranges[last].to = toLine.to
+    else ranges.push({from: fromLine.from, to: toLine.to})
+  }
+  return ranges
+}
+
 // Performs toggle, comment and uncomment of block comments in
 // languages that support them.
 function changeBlockComment(
   option: CommentOption,
-  ranges: readonly {readonly from: number, readonly to: number}[],
-  state: EditorState
+  state: EditorState,
+  ranges: readonly {from: number, to: number}[] = state.selection.ranges,
 ) {
   let tokens = ranges.map(r => getConfig(state, r.from).block) as {open: string, close: string}[]
   if (!tokens.every(c => c)) return null
   let comments = ranges.map((r, i) => findBlockComment(state, tokens[i], r.from, r.to))
   if (option != CommentOption.Uncomment && !comments.every(c => c)) {
-    let index = 0
-    return state.changeByRange(range => {
-      let {open, close} = tokens[index++]
-      if (comments[index]) return {range}
-      let shift = open.length + 1
-      return {
-        changes: [{from: range.from, insert: open + " "}, {from: range.to, insert: " " + close}],
-        range: EditorSelection.range(range.anchor + shift, range.head + shift)
-      }
-    })
+    return {changes: state.changes(ranges.map((range, i) => {
+      if (comments[i]) return []
+      return [{from: range.from, insert: tokens[i].open + " "}, {from: range.to, insert: " " + tokens[i].close}]
+    }))}
   } else if (option != CommentOption.Comment && comments.some(c => c)) {
     let changes = []
     for (let i = 0, comment; i < comments.length; i++) if (comment = comments[i]) {
@@ -151,8 +163,8 @@ function changeBlockComment(
 // Performs toggle, comment and uncomment of line comments.
 function changeLineComment(
   option: CommentOption,
-  ranges: readonly {readonly from: number, readonly to: number}[],
-  state: EditorState
+  state: EditorState,
+  ranges: readonly {from: number, to: number}[] = state.selection.ranges,
 ): TransactionSpec | null {
   let lines: {line: Line, token: string, comment: number, empty: boolean, indent: number, single: boolean}[] = []
   let prevLine = -1

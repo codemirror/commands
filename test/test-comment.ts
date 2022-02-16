@@ -1,6 +1,6 @@
 import ist from "ist"
 import {SelectionRange, EditorState, EditorSelection, Extension, StateCommand} from "@codemirror/state"
-import {toggleLineComment, CommentTokens, toggleBlockComment} from "@codemirror/comment"
+import {toggleLineComment, CommentTokens, toggleBlockComment, toggleBlockCommentByLine} from "@codemirror/comment"
 import {htmlLanguage} from "@codemirror/lang-html"
 
 describe("comment", () => {
@@ -151,6 +151,9 @@ describe("comment", () => {
       function check(...docs: string[]) {
         checkToggleChain(toggleBlockComment, {block: {open: o, close: c}}, docs)
       }
+      function checkLine(...docs: string[]) {
+        checkToggleChain(toggleBlockCommentByLine, {block: {open: o, close: c}}, docs)
+      }
 
       it("toggles block comment in multi-line selection", () => {
         check(`\n  lin|e 1\n  line 2\n  line 3\n  line |4\n  line 5\n`,
@@ -166,6 +169,21 @@ describe("comment", () => {
         check(`|${o} one\ntwo ${c}| three`,
               `|one\ntwo| three`,
               `${o} |one\ntwo| ${c} three`)
+      })
+
+      it("comments the entire line", () => {
+        checkLine(`one|\ntwo`,
+                  `${o} one| ${c}\ntwo`)
+      })
+
+      it("comments multiple lines", () => {
+        checkLine(`on|e\nt|wo`,
+                  `${o} on|e\nt|wo ${c}`)
+      })
+
+      it("joins selected blocks of lines", () => {
+        checkLine(`on|e\nt|w|o\nth|ree`,
+                  `${o} on|e\nt|w|o\nth|ree ${c}`)
       })
     })
   }
