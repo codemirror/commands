@@ -20,6 +20,8 @@ export const toggleComment: StateCommand = target => {
   return config.line ? toggleLineComment(target) : config.block ? toggleBlockCommentByLine(target) : false
 }
 
+const enum CommentOption { Toggle, Comment, Uncomment }
+
 function command(f: (option: CommentOption, state: EditorState) => TransactionSpec | null,
                  option: CommentOption): StateCommand {
   return ({state, dispatch}) => {
@@ -68,8 +70,6 @@ export const commentKeymap: readonly KeyBinding[] = [
   {key: "Mod-/", run: toggleComment},
   {key: "Alt-A", run: toggleBlockComment}
 ]
-
-const enum CommentOption { Toggle, Comment, Uncomment }
 
 function getConfig(state: EditorState, pos = state.selection.main.head) {
   let data = state.languageDataAt<CommentTokens>("commentTokens", pos)
