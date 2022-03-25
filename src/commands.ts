@@ -1,7 +1,7 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
         ChangeSpec, Transaction, CharCategory} from "@codemirror/state"
 import {findClusterBreak, Text, Line, countColumn} from "@codemirror/text"
-import {EditorView, Command, Direction, KeyBinding, PluginField} from "@codemirror/view"
+import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation} from "@codemirror/language"
@@ -383,7 +383,7 @@ function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => numbe
 }
 
 function skipAtomic(target: CommandTarget, pos: number, forward: boolean) {
-  if (target instanceof EditorView) for (let ranges of target.pluginField(PluginField.atomicRanges))
+  if (target instanceof EditorView) for (let ranges of target.state.facet(EditorView.atomicRanges).map(f => f(target)))
     ranges.between(pos, pos, (from, to) => {
       if (from < pos && to > pos) pos = forward ? to : from
     })
