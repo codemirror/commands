@@ -803,10 +803,10 @@ export const standardKeymap: readonly KeyBinding[] = ([
   {key: "PageUp", run: cursorPageUp, shift: selectPageUp},
   {key: "PageDown", run: cursorPageDown, shift: selectPageDown},
 
-  {key: "Home", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward},
+  {key: "Home", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward, preventDefault: true},
   {key: "Mod-Home", run: cursorDocStart, shift: selectDocStart},
 
-  {key: "End", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward},
+  {key: "End", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward, preventDefault: true},
   {key: "Mod-End", run: cursorDocEnd, shift: selectDocEnd},
 
   {key: "Enter", run: insertNewlineAndIndent},
