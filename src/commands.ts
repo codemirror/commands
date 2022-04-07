@@ -33,11 +33,15 @@ function cursorByChar(view: EditorView, forward: boolean) {
   return moveSel(view, range => range.empty ? view.moveByChar(range, forward) : rangeEnd(range, forward))
 }
 
+function ltrAtCursor(view: EditorView) {
+  return view.textDirectionAt(view.state.selection.main.head) == Direction.LTR
+}
+
 /// Move the selection one character to the left (which is backward in
 /// left-to-right text, forward in right-to-left text).
-export const cursorCharLeft: Command = view => cursorByChar(view, view.textDirection != Direction.LTR)
+export const cursorCharLeft: Command = view => cursorByChar(view, !ltrAtCursor(view))
 /// Move the selection one character to the right.
-export const cursorCharRight: Command = view => cursorByChar(view, view.textDirection == Direction.LTR)
+export const cursorCharRight: Command = view => cursorByChar(view, ltrAtCursor(view))
 
 /// Move the selection one character forward.
 export const cursorCharForward: Command = view => cursorByChar(view, true)
@@ -50,9 +54,9 @@ function cursorByGroup(view: EditorView, forward: boolean) {
 
 /// Move the selection to the left across one group of word or
 /// non-word (but also non-space) characters.
-export const cursorGroupLeft: Command = view => cursorByGroup(view, view.textDirection != Direction.LTR)
+export const cursorGroupLeft: Command = view => cursorByGroup(view, !ltrAtCursor(view))
 /// Move the selection one group to the right.
-export const cursorGroupRight: Command = view => cursorByGroup(view, view.textDirection == Direction.LTR)
+export const cursorGroupRight: Command = view => cursorByGroup(view, ltrAtCursor(view))
 
 /// Move the selection one group forward.
 export const cursorGroupForward: Command = view => cursorByGroup(view, true)
@@ -126,10 +130,10 @@ function moveBySyntax(state: EditorState, start: SelectionRange, forward: boolea
 
 /// Move the cursor over the next syntactic element to the left.
 export const cursorSyntaxLeft: Command =
-  view => moveSel(view, range => moveBySyntax(view.state, range, view.textDirection != Direction.LTR))
+  view => moveSel(view, range => moveBySyntax(view.state, range, !ltrAtCursor(view)))
 /// Move the cursor over the next syntactic element to the right.
 export const cursorSyntaxRight: Command =
-  view => moveSel(view, range => moveBySyntax(view.state, range, view.textDirection == Direction.LTR))
+  view => moveSel(view, range => moveBySyntax(view.state, range, ltrAtCursor(view)))
 
 function cursorByLine(view: EditorView, forward: boolean) {
   return moveSel(view, range => {
@@ -229,9 +233,9 @@ function selectByChar(view: EditorView, forward: boolean) {
 
 /// Move the selection head one character to the left, while leaving
 /// the anchor in place.
-export const selectCharLeft: Command = view => selectByChar(view, view.textDirection != Direction.LTR)
+export const selectCharLeft: Command = view => selectByChar(view, !ltrAtCursor(view))
 /// Move the selection head one character to the right.
-export const selectCharRight: Command = view => selectByChar(view, view.textDirection == Direction.LTR)
+export const selectCharRight: Command = view => selectByChar(view, ltrAtCursor(view))
 
 /// Move the selection head one character forward.
 export const selectCharForward: Command = view => selectByChar(view, true)
@@ -244,9 +248,9 @@ function selectByGroup(view: EditorView, forward: boolean) {
 
 /// Move the selection head one [group](#commands.cursorGroupLeft) to
 /// the left.
-export const selectGroupLeft: Command = view => selectByGroup(view, view.textDirection != Direction.LTR)
+export const selectGroupLeft: Command = view => selectByGroup(view, !ltrAtCursor(view))
 /// Move the selection head one group to the right.
-export const selectGroupRight: Command = view => selectByGroup(view, view.textDirection == Direction.LTR)
+export const selectGroupRight: Command = view => selectByGroup(view, ltrAtCursor(view))
 
 /// Move the selection head one group forward.
 export const selectGroupForward: Command = view => selectByGroup(view, true)
@@ -264,10 +268,10 @@ export const selectSubwordBackward: Command = view => selectBySubword(view, fals
 
 /// Move the selection head over the next syntactic element to the left.
 export const selectSyntaxLeft: Command =
-  view => extendSel(view, range => moveBySyntax(view.state, range, view.textDirection != Direction.LTR))
+  view => extendSel(view, range => moveBySyntax(view.state, range, !ltrAtCursor(view)))
 /// Move the selection head over the next syntactic element to the right.
 export const selectSyntaxRight: Command =
-  view => extendSel(view, range => moveBySyntax(view.state, range, view.textDirection == Direction.LTR))
+  view => extendSel(view, range => moveBySyntax(view.state, range, ltrAtCursor(view)))
 
 function selectByLine(view: EditorView, forward: boolean) {
   return extendSel(view, range => view.moveVertically(range, forward))
