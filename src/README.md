@@ -175,6 +175,30 @@ with key bindings for a lot of them.
 
 @insertBlankLine
 
+### Undo History
+
+@history
+
+@historyKeymap
+
+@historyField
+
+@undo
+
+@redo
+
+@undoSelection
+
+@redoSelection
+
+@undoDepth
+
+@redoDepth
+
+@isolateHistory
+
+@invertedEffects
+
 ### Commenting and Uncommenting
 
 @CommentTokens

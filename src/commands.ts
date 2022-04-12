@@ -9,6 +9,8 @@ import {toggleComment, toggleBlockComment} from "./comment"
 
 export {CommentTokens, toggleComment, toggleLineComment, lineComment, lineUncomment,
         toggleBlockComment, blockComment, blockUncomment, toggleBlockCommentByLine} from "./comment"
+export {history, historyKeymap, historyField, undo, redo, undoSelection, redoSelection,
+        undoDepth, redoDepth, isolateHistory, invertedEffects} from "./history"
 
 function updateSel(sel: EditorSelection, by: (range: SelectionRange) => SelectionRange) {
   return EditorSelection.create(sel.ranges.map(by), sel.mainIndex)

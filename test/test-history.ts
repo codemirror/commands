@@ -3,7 +3,7 @@ import ist from "ist"
 import {EditorState, EditorSelection, Transaction,
         StateEffect, StateEffectType, StateField, ChangeDesc} from "@codemirror/state"
 import {isolateHistory, history, redo, redoDepth, redoSelection, undo, undoDepth,
-        undoSelection, invertedEffects, historyField} from "@codemirror/history"
+        undoSelection, invertedEffects, historyField} from "@codemirror/commands"
 
 function mkState(config?: any, doc?: string) {
   return EditorState.create({
