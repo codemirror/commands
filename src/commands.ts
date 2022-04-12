@@ -1,6 +1,6 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
-        ChangeSpec, Transaction, CharCategory} from "@codemirror/state"
-import {findClusterBreak, Text, Line, countColumn} from "@codemirror/text"
+        ChangeSpec, Transaction, CharCategory,
+        findClusterBreak, Text, Line, countColumn} from "@codemirror/state"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {matchBrackets} from "@codemirror/matchbrackets"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
