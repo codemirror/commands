@@ -1,5 +1,4 @@
-import {Line} from "@codemirror/text"
-import {EditorState, TransactionSpec, StateCommand} from "@codemirror/state"
+import {Line, EditorState, TransactionSpec, StateCommand} from "@codemirror/state"
 import {KeyBinding} from "@codemirror/view"
 
 /// An object of this type can be provided as [language
