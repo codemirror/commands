@@ -5,6 +5,10 @@ import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation, matchBrackets} from "@codemirror/language"
 import {SyntaxNode, NodeProp} from "@lezer/common"
+import {toggleComment, toggleBlockComment} from "./comment"
+
+export {CommentTokens, toggleComment, toggleLineComment, lineComment, lineUncomment,
+        toggleBlockComment, blockComment, blockUncomment, toggleBlockCommentByLine} from "./comment"
 
 function updateSel(sel: EditorSelection, by: (range: SelectionRange) => SelectionRange) {
   return EditorSelection.create(sel.ranges.map(by), sel.mainIndex)
@@ -842,6 +846,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Ctrl-Alt-\\ (Cmd-Alt-\\ on macOS): [`indentSelection`](#commands.indentSelection)
 /// - Shift-Ctrl-k (Shift-Cmd-k on macOS): [`deleteLine`](#commands.deleteLine)
 /// - Shift-Ctrl-\\ (Shift-Cmd-\\ on macOS): [`cursorMatchingBracket`](#commands.cursorMatchingBracket)
+/// - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#comment.toggleComment).
+/// - Shift-Alt-a: [`toggleBlockComment`](#comment.toggleBlockComment).
 export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Alt-ArrowLeft", mac: "Ctrl-ArrowLeft", run: cursorSyntaxLeft, shift: selectSyntaxLeft},
   {key: "Alt-ArrowRight", mac: "Ctrl-ArrowRight", run: cursorSyntaxRight, shift: selectSyntaxRight},
@@ -864,7 +870,10 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Shift-Mod-k", run: deleteLine},
 
-  {key: "Shift-Mod-\\", run: cursorMatchingBracket}
+  {key: "Shift-Mod-\\", run: cursorMatchingBracket},
+
+  {key: "Mod-/", run: toggleComment},
+  {key: "Alt-A", run: toggleBlockComment}
 ] as readonly KeyBinding[]).concat(standardKeymap)
 
 /// A binding that binds Tab to [`indentMore`](#commands.indentMore) and

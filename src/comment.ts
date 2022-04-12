@@ -1,5 +1,4 @@
 import {Line, EditorState, TransactionSpec, StateCommand} from "@codemirror/state"
-import {KeyBinding} from "@codemirror/view"
 
 /// An object of this type can be provided as [language
 /// data](#state.EditorState.languageDataAt) under a `"commentTokens"`
@@ -60,15 +59,6 @@ export const blockUncomment = command(changeBlockComment, CommentOption.Uncommen
 /// block comments.
 export const toggleBlockCommentByLine =
   command((o, s) => changeBlockComment(o, s, selectedLineRanges(s)), CommentOption.Toggle)
-
-/// Default key bindings for this package.
-///
-///  - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#comment.toggleComment).
-///  - Shift-Alt-a: [`toggleBlockComment`](#comment.toggleBlockComment).
-export const commentKeymap: readonly KeyBinding[] = [
-  {key: "Mod-/", run: toggleComment},
-  {key: "Alt-A", run: toggleBlockComment}
-]
 
 function getConfig(state: EditorState, pos = state.selection.main.head) {
   let data = state.languageDataAt<CommentTokens>("commentTokens", pos)

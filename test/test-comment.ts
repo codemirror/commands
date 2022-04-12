@@ -1,6 +1,6 @@
 import ist from "ist"
 import {SelectionRange, EditorState, EditorSelection, Extension, StateCommand} from "@codemirror/state"
-import {toggleLineComment, CommentTokens, toggleBlockComment, toggleBlockCommentByLine} from "@codemirror/comment"
+import {toggleLineComment, CommentTokens, toggleBlockComment, toggleBlockCommentByLine} from "@codemirror/commands"
 import {htmlLanguage} from "@codemirror/lang-html"
 
 describe("comment", () => {

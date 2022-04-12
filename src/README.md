@@ -165,7 +165,7 @@ with key bindings for a lot of them.
 
 @insertTab
 
-### Character manipulation
+### Character Manipulation
 
 @transposeChars
 
@@ -174,3 +174,25 @@ with key bindings for a lot of them.
 @insertNewlineAndIndent
 
 @insertBlankLine
+
+### Commenting and Uncommenting
+
+@CommentTokens
+
+@toggleComment
+
+@toggleLineComment
+
+@lineComment
+
+@lineUncomment
+
+@toggleBlockComment
+
+@blockComment
+
+@blockUncomment
+
+@toggleBlockCommentByLine
+
+@commentKeymap
