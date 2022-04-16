@@ -33,7 +33,7 @@ function command(f: (option: CommentOption, state: EditorState) => TransactionSp
 
 /// Comment or uncomment the current selection using line comments.
 /// The line comment syntax is taken from the
-/// [`commentTokens`](#comment.CommentTokens) [language
+/// [`commentTokens`](#commands.CommentTokens) [language
 /// data](#state.EditorState.languageDataAt).
 export const toggleLineComment = command(changeLineComment, CommentOption.Toggle)
 
@@ -45,7 +45,7 @@ export const lineUncomment = command(changeLineComment, CommentOption.Uncomment)
 
 /// Comment or uncomment the current selection using block comments.
 /// The block comment syntax is taken from the
-/// [`commentTokens`](#comment.CommentTokens) [language
+/// [`commentTokens`](#commands.CommentTokens) [language
 /// data](#state.EditorState.languageDataAt).
 export const toggleBlockComment = command(changeBlockComment, CommentOption.Toggle)
 

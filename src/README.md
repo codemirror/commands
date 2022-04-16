@@ -218,5 +218,3 @@ with key bindings for a lot of them.
 @blockUncomment
 
 @toggleBlockCommentByLine
-
-@commentKeymap

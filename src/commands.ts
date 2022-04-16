@@ -848,8 +848,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Ctrl-Alt-\\ (Cmd-Alt-\\ on macOS): [`indentSelection`](#commands.indentSelection)
 /// - Shift-Ctrl-k (Shift-Cmd-k on macOS): [`deleteLine`](#commands.deleteLine)
 /// - Shift-Ctrl-\\ (Shift-Cmd-\\ on macOS): [`cursorMatchingBracket`](#commands.cursorMatchingBracket)
-/// - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#comment.toggleComment).
-/// - Shift-Alt-a: [`toggleBlockComment`](#comment.toggleBlockComment).
+/// - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#commands.toggleComment).
+/// - Shift-Alt-a: [`toggleBlockComment`](#commands.toggleBlockComment).
 export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Alt-ArrowLeft", mac: "Ctrl-ArrowLeft", run: cursorSyntaxLeft, shift: selectSyntaxLeft},
   {key: "Alt-ArrowRight", mac: "Ctrl-ArrowRight", run: cursorSyntaxRight, shift: selectSyntaxRight},
