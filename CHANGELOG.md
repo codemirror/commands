@@ -1,3 +1,21 @@
+## 0.20.0 (2022-04-20)
+
+### Breaking changes
+
+There is no longer a separate `commentKeymap`. Those bindings are now part of `defaultKeymap`.
+
+### Bug fixes
+
+Make `cursorPageUp` and `cursorPageDown` move by window height when the editor is higher than the window.
+
+Make sure the default behavior of Home/End is prevented, since it could produce unexpected results on macOS.
+
+### New features
+
+The exports from @codemirror/comment are now available in this package.
+
+The exports from the @codemirror/history package are now available from this package.
+
 ## 0.19.8 (2022-01-26)
 
 ### Bug fixes
