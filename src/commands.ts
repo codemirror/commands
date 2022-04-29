@@ -153,10 +153,13 @@ export const cursorLineUp: Command = view => cursorByLine(view, false)
 /// Move the selection one line down.
 export const cursorLineDown: Command = view => cursorByLine(view, true)
 
+function pageHeight(view: EditorView) {
+  return Math.max(view.defaultLineHeight, Math.min(view.dom.clientHeight, innerHeight) - 5)
+}
+
 function cursorByPage(view: EditorView, forward: boolean) {
   let {state} = view, selection = updateSel(state.selection, range => {
-    return range.empty ? view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight))
-      : rangeEnd(range, forward)
+    return range.empty ? view.moveVertically(range, forward, pageHeight(view)) : rangeEnd(range, forward)
   })
   if (selection.eq(state.selection)) return false
   let startPos = view.coordsAtPos(state.selection.main.head)
@@ -288,7 +291,7 @@ export const selectLineUp: Command = view => selectByLine(view, false)
 export const selectLineDown: Command = view => selectByLine(view, true)
 
 function selectByPage(view: EditorView, forward: boolean) {
-  return extendSel(view, range => view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight)))
+  return extendSel(view, range => view.moveVertically(range, forward, pageHeight(view)))
 }
 
 /// Move the selection head one page up.
