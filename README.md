@@ -1,6 +1,6 @@
 # @codemirror/commands [![NPM version](https://img.shields.io/npm/v/@codemirror/commands.svg)](https://www.npmjs.org/package/@codemirror/commands)
 
-[ [**WEBSITE**](https://codemirror.net/) | [**DOCS**](https://codemirror.net/docs/ref/#commands) | [**ISSUES**](https://github.com/codemirror/codemirror.next/issues) | [**FORUM**](https://discuss.codemirror.net/c/next/) | [**CHANGELOG**](https://github.com/codemirror/commands/blob/main/CHANGELOG.md) ]
+[ [**WEBSITE**](https://codemirror.net/) | [**DOCS**](https://codemirror.net/docs/ref/#commands) | [**ISSUES**](https://github.com/codemirror/dev/issues) | [**FORUM**](https://discuss.codemirror.net/c/next/) | [**CHANGELOG**](https://github.com/codemirror/commands/blob/main/CHANGELOG.md) ]
 
 This package implements a collection of editing commands for the
 [CodeMirror](https://codemirror.net/) code editor.
