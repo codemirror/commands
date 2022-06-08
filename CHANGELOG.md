@@ -1,3 +1,9 @@
+## 6.0.0 (2022-06-08)
+
+### Bug fixes
+
+Fix a bug where by-page selection commands sometimes moved one line too far.
+
 ## 0.20.0 (2022-04-20)
 
 ### Breaking changes
