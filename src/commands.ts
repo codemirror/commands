@@ -390,7 +390,11 @@ function deleteBy({state, dispatch}: CommandTarget, by: (start: number) => numbe
     return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from)}
   })
   if (changes.changes.empty) return false
-  dispatch(state.update(changes, {scrollIntoView: true, userEvent: event}))
+  dispatch(state.update(changes, {
+    scrollIntoView: true,
+    userEvent: event,
+    effects: event == "delete.selection" ? EditorView.announce.of(state.phrase("Selection deleted")) : undefined
+  }))
   return true
 }
 
