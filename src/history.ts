@@ -162,6 +162,8 @@ class HistEvent {
     readonly changes: ChangeSet | undefined,
     // The effects associated with this event
     readonly effects: readonly StateEffect<any>[],
+    // Accumulated mapping (from addToHistory==false) that should be
+    // applied to events below this one.
     readonly mapped: ChangeDesc | undefined,
     // The selection before this event
     readonly startSelection: EditorSelection | undefined,

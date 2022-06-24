@@ -457,6 +457,14 @@ describe("history", () => {
       ist(state.doc.toString(), "oopshello!")
       ist(state.selection.eq(selection))
     })
+
+    it("preserves text inserted inside a change", () => {
+      let state = mkState()
+      state = type(state, "1234")
+      state = state.update({changes: {from: 2, insert: "x"}, annotations: Transaction.addToHistory.of(false)}).state
+      state = command(state, undo)
+      ist(state.doc.toString(), "x")
+    })
   })
 
   describe("effects", () => {
@@ -535,11 +543,11 @@ describe("history", () => {
       let state = EditorState.create({extensions: [history(), comments, invertComments],
                                       doc: "one two foo"})
       state = state.update({effects: addComment.of(new Comment(0, 3, "c1")),
-                        annotations: isolateHistory.of("full")}).state
+                            annotations: isolateHistory.of("full")}).state
       ist(commentStr(state), "c1@0")
       state = state.update({changes: {from: 3, to: 4, insert: "---"},
-                        annotations: isolateHistory.of("full"),
-                        effects: addComment.of(new Comment(6, 9, "c2"))}).state
+                            annotations: isolateHistory.of("full"),
+                            effects: addComment.of(new Comment(6, 9, "c2"))}).state
       ist(commentStr(state), "c1@0,c2@6")
       state = state.update({changes: {from: 0, insert: "---"}, annotations: Transaction.addToHistory.of(false)}).state
       ist(commentStr(state), "c1@3,c2@9")
@@ -554,9 +562,9 @@ describe("history", () => {
       ist(commentStr(state), "c1@3,c2@9")
       ist(state.doc.toString(), "---one---two foo")
       state = command(state, undo).update({changes: {from: 10, to: 11, insert: "---"},
-                                       annotations: Transaction.addToHistory.of(false)}).state
+                                           annotations: Transaction.addToHistory.of(false)}).state
       state = state.update({effects: addComment.of(new Comment(13, 16, "c3")),
-                        annotations: isolateHistory.of("full")}).state
+                            annotations: isolateHistory.of("full")}).state
       ist(commentStr(state), "c1@3,c3@13")
       state = command(state, undo)
       ist(state.doc.toString(), "---one two---foo")
