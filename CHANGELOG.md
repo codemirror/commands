@@ -1,3 +1,11 @@
+## 6.0.1 (2022-06-30)
+
+### Bug fixes
+
+Announce to the screen reader when the selection is deleted.
+
+Also bind Ctrl-Shift-z to redo on Linux.
+
 ## 6.0.0 (2022-06-08)
 
 ### Bug fixes
