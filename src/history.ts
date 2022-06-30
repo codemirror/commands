@@ -381,12 +381,13 @@ class HistoryState {
 /// Default key bindings for the undo history.
 ///
 /// - Mod-z: [`undo`](#commands.undo).
-/// - Mod-y (Mod-Shift-z on macOS): [`redo`](#commands.redo).
+/// - Mod-y (Mod-Shift-z on macOS) + Ctrl-Shift-z on Linux: [`redo`](#commands.redo).
 /// - Mod-u: [`undoSelection`](#commands.undoSelection).
 /// - Alt-u (Mod-Shift-u on macOS): [`redoSelection`](#commands.redoSelection).
 export const historyKeymap: readonly KeyBinding[] = [
   {key: "Mod-z", run: undo, preventDefault: true},
   {key: "Mod-y", mac: "Mod-Shift-z", run: redo, preventDefault: true},
+  {linux: "Ctrl-Shift-z", run: redo, preventDefault: true},
   {key: "Mod-u", run: undoSelection, preventDefault: true},
   {key: "Alt-u", mac: "Mod-Shift-u", run: redoSelection, preventDefault: true}
 ]
