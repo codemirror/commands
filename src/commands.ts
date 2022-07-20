@@ -801,11 +801,11 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - Cmd-Delete (macOS): [`deleteToLineEnd`](#commands.deleteToLineEnd).
 export const standardKeymap: readonly KeyBinding[] = ([
   {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft, preventDefault: true},
-  {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft},
+  {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft, preventDefault: true},
   {mac: "Cmd-ArrowLeft", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward},
 
   {key: "ArrowRight", run: cursorCharRight, shift: selectCharRight, preventDefault: true},
-  {key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: cursorGroupRight, shift: selectGroupRight},
+  {key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: cursorGroupRight, shift: selectGroupRight, preventDefault: true},
   {mac: "Cmd-ArrowRight", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward},
 
   {key: "ArrowUp", run: cursorLineUp, shift: selectLineUp, preventDefault: true},
