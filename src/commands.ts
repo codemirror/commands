@@ -196,6 +196,12 @@ export const cursorLineBoundaryForward: Command = view => moveSel(view, range =>
 /// isn't already at the end of the indentation, this will move to the
 /// end of the indentation instead of the start of the line.
 export const cursorLineBoundaryBackward: Command = view => moveSel(view, range => moveByLineBoundary(view, range, false))
+/// Move the selection one line wrap point to the left.
+export const cursorLineBoundaryLeft: Command = view => moveSel(view, range =>
+  moveByLineBoundary(view, range, !ltrAtCursor(view)))
+/// Move the selection one line wrap point to the right.
+export const cursorLineBoundaryRight: Command = view => moveSel(view, range =>
+  moveByLineBoundary(view, range, ltrAtCursor(view)))
 
 /// Move the selection to the start of the line.
 export const cursorLineStart: Command = view => moveSel(view, range => EditorSelection.cursor(view.lineBlockAt(range.head).from, 1))
@@ -303,6 +309,12 @@ export const selectPageDown: Command = view => selectByPage(view, true)
 export const selectLineBoundaryForward: Command = view => extendSel(view, range => moveByLineBoundary(view, range, true))
 /// Move the selection head to the previous line boundary.
 export const selectLineBoundaryBackward: Command = view => extendSel(view, range => moveByLineBoundary(view, range, false))
+/// Move the selection head one line boundary to the left.
+export const selectLineBoundaryLeft: Command = view => extendSel(view, range =>
+  moveByLineBoundary(view, range, !ltrAtCursor(view)))
+/// Move the selection head one line boundary to the right.
+export const selectLineBoundaryRight: Command = view => extendSel(view, range =>
+  moveByLineBoundary(view, range, ltrAtCursor(view)))
 
 /// Move the selection head to the start of the line.
 export const selectLineStart: Command = view => extendSel(view, range => EditorSelection.cursor(view.lineBlockAt(range.head).from))
@@ -802,11 +814,11 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 export const standardKeymap: readonly KeyBinding[] = ([
   {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft, preventDefault: true},
   {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft, preventDefault: true},
-  {mac: "Cmd-ArrowLeft", run: cursorLineBoundaryBackward, shift: selectLineBoundaryBackward},
+  {mac: "Cmd-ArrowLeft", run: cursorLineBoundaryLeft, shift: selectLineBoundaryLeft, preventDefault: true},
 
   {key: "ArrowRight", run: cursorCharRight, shift: selectCharRight, preventDefault: true},
   {key: "Mod-ArrowRight", mac: "Alt-ArrowRight", run: cursorGroupRight, shift: selectGroupRight, preventDefault: true},
-  {mac: "Cmd-ArrowRight", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward},
+  {mac: "Cmd-ArrowRight", run: cursorLineBoundaryRight, shift: selectLineBoundaryRight, preventDefault: true},
 
   {key: "ArrowUp", run: cursorLineUp, shift: selectLineUp, preventDefault: true},
   {mac: "Cmd-ArrowUp", run: cursorDocStart, shift: selectDocStart},

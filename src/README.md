@@ -87,6 +87,14 @@ with key bindings for a lot of them.
 
 @selectLineBoundaryBackward
 
+@cursorLineBoundaryLeft
+
+@selectLineBoundaryLeft
+
+@cursorLineBoundaryRight
+
+@selectLineBoundaryRight
+
 @cursorLineStart
 
 @selectLineStart
