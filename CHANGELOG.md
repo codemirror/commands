@@ -1,3 +1,15 @@
+## 6.1.0 (2022-08-18)
+
+### Bug fixes
+
+Prevent native behavior on Ctrl/Cmd-ArrowLeft/ArrowRight bindings, so that browsers with odd bidi behavior won't do the wrong thing at start/end of line.
+
+Cmd-ArrowLeft/Right on macOS now moves the cursor in the direction of the arrow even in right-to-left content.
+
+### New features
+
+The new `cursorLineBoundaryLeft`/`Right` and `selectLineBoundaryLeft`/`Right` commands allow directional motion to line boundaries.
+
 ## 6.0.1 (2022-06-30)
 
 ### Bug fixes
