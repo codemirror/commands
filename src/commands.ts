@@ -405,7 +405,7 @@ function deleteBy(target: CommandTarget, by: (start: number) => number) {
       to = Math.max(to, towards)
     } else {
       from = skipAtomic(target, from, false)
-      to = skipAtomic(target, from, true)
+      to = skipAtomic(target, to, true)
     }
     return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from)}
   })
