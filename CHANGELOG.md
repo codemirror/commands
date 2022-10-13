@@ -1,3 +1,9 @@
+## 6.1.2 (2022-10-13)
+
+### Bug fixes
+
+Fix a bug that caused deletion commands on non-empty ranges to incorrectly return false and do nothing, causing the editor to fall back to native behavior.
+
 ## 6.1.1 (2022-09-28)
 
 ### Bug fixes
