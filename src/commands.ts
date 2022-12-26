@@ -234,7 +234,7 @@ export const selectMatchingBracket: StateCommand = ({state, dispatch}) => toMatc
 function extendSel(view: EditorView, how: (range: SelectionRange) => SelectionRange): boolean {
   let selection = updateSel(view.state.selection, range => {
     let head = how(range)
-    return EditorSelection.range(range.anchor, head.head, head.goalColumn)
+    return EditorSelection.range(range.anchor, head.head, head.goalColumn, head.bidiLevel || undefined)
   })
   if (selection.eq(view.state.selection)) return false
   view.dispatch(setSel(view.state, selection))
