@@ -1,3 +1,9 @@
+## 6.1.3 (2022-12-26)
+
+### Bug fixes
+
+Preserve selection bidi level when extending the selection, to prevent shift-selection from getting stuck in some kinds of bidirectional text.
+
 ## 6.1.2 (2022-10-13)
 
 ### Bug fixes
