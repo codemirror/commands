@@ -100,6 +100,23 @@ describe("history", () => {
     ist(undoDepth(state), 2)
   })
 
+  it("supports a custom join predicate", () => {
+    let state = mkState({joinToEvent: (tr: Transaction, adj: boolean) => {
+      if (!adj) return false
+      let space = false
+      if (adj) tr.changes.iterChanges((fA, tA, fB, tB, text) => {
+        if (text.length && text.sliceString(0, 1) == " ") space = true
+      })
+      return !space
+    }})
+    for (let ch of "ab cd") state = type(state, ch)
+    ist(state.sliceDoc(), "ab cd")
+    state = command(state, undo)
+    ist(state.sliceDoc(), "ab")
+    state = command(state, undo)
+    ist(state.sliceDoc(), "")
+  })
+
   it("allows changes that aren't part of the history", () => {
     let state = mkState()
     state = type(state, "hello")

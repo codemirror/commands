@@ -22,18 +22,28 @@ export const invertedEffects = Facet.define<(tr: Transaction) => readonly StateE
 
 interface HistoryConfig {
   /// The minimum depth (amount of events) to store. Defaults to 100.
-  minDepth?: number,
+  minDepth?: number
   /// The maximum time (in milliseconds) that adjacent events can be
   /// apart and still be grouped together. Defaults to 500.
   newGroupDelay?: number
+  /// By default, when close enough together in time, changes are
+  /// joined into an existing undo event if they touch any of the
+  /// changed ranges from that event. You can pass a custom predicate
+  /// here to influence that logic.
+  joinToEvent?: (tr: Transaction, isAdjacent: boolean) => boolean
 }
 
 const historyConfig = Facet.define<HistoryConfig, Required<HistoryConfig>>({
   combine(configs) {
     return combineConfig(configs, {
       minDepth: 100,
-      newGroupDelay: 500
-    }, {minDepth: Math.max, newGroupDelay: Math.min})
+      newGroupDelay: 500,
+      joinToEvent: (_t, isAdjacent) => isAdjacent,
+    }, {
+      minDepth: Math.max,
+      newGroupDelay: Math.min,
+      joinToEvent: (a, b) => (tr, adj) => a(tr, adj) || b(tr, adj)
+    })
   }
 })
 
@@ -71,7 +81,7 @@ const historyField_ = StateField.define({
     let event = HistEvent.fromTransaction(tr)
     let time = tr.annotation(Transaction.time)!, userEvent = tr.annotation(Transaction.userEvent)
     if (event)
-      state = state.addChanges(event, time, userEvent, config.newGroupDelay, config.minDepth)
+      state = state.addChanges(event, time, userEvent, config, tr)
     else if (tr.selection)
       state = state.addSelection(tr.startState.selection, time, userEvent, config.newGroupDelay)
 
@@ -313,20 +323,21 @@ class HistoryState {
     return this.prevTime ? new HistoryState(this.done, this.undone) : this
   }
 
-  addChanges(event: HistEvent, time: number, userEvent: string | undefined, newGroupDelay: number, maxLen: number): HistoryState {
+  addChanges(event: HistEvent, time: number, userEvent: string | undefined,
+             config: Required<HistoryConfig>, tr: Transaction): HistoryState {
     let done = this.done, lastEvent = done[done.length - 1]
     if (lastEvent && lastEvent.changes && !lastEvent.changes.empty && event.changes &&
         (!userEvent || joinableUserEvent.test(userEvent)) &&
         ((!lastEvent.selectionsAfter.length &&
-          time - this.prevTime < newGroupDelay &&
-          isAdjacent(lastEvent.changes, event.changes)) ||
+          time - this.prevTime < config.newGroupDelay &&
+          config.joinToEvent(tr, isAdjacent(lastEvent.changes, event.changes))) ||
          // For compose (but not compose.start) events, always join with previous event
          userEvent == "input.type.compose")) {
-      done = updateBranch(done, done.length - 1, maxLen,
+      done = updateBranch(done, done.length - 1, config.minDepth,
                           new HistEvent(event.changes.compose(lastEvent.changes), conc(event.effects, lastEvent.effects),
                                         lastEvent.mapped, lastEvent.startSelection, none))
     } else {
-      done = updateBranch(done, done.length, maxLen, event)
+      done = updateBranch(done, done.length, config.minDepth, event)
     }
     return new HistoryState(done, none, time, userEvent)
   }
