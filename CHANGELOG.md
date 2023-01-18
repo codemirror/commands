@@ -1,3 +1,9 @@
+## 6.2.0 (2023-01-18)
+
+### New features
+
+The new `joinToEvent` history configuration option allows you to provide custom logic that determines whether a new transaction is added to an existing history event.
+
 ## 6.1.3 (2022-12-26)
 
 ### Bug fixes
