@@ -14,7 +14,7 @@ export interface CommentTokens {
 /// Comment or uncomment the current selection. Will use line comments
 /// if available, otherwise falling back to block comments.
 export const toggleComment: StateCommand = target => {
-  let config = getConfig(target.state)
+  let {state} = target, line = state.doc.lineAt(state.selection.main.head), config = getConfig(target.state, line.from)
   return config.line ? toggleLineComment(target) : config.block ? toggleBlockCommentByLine(target) : false
 }
 
@@ -60,7 +60,7 @@ export const blockUncomment = command(changeBlockComment, CommentOption.Uncommen
 export const toggleBlockCommentByLine =
   command((o, s) => changeBlockComment(o, s, selectedLineRanges(s)), CommentOption.Toggle)
 
-function getConfig(state: EditorState, pos = state.selection.main.head) {
+function getConfig(state: EditorState, pos: number) {
   let data = state.languageDataAt<CommentTokens>("commentTokens", pos)
   return data.length ? data[0] : {}
 }
