@@ -163,7 +163,7 @@ function changeLineComment(
       let line = state.doc.lineAt(pos)
       if (line.from > prevLine && (from == to || to > line.from)) {
         prevLine = line.from
-        let token = getConfig(state, pos).line
+        let token = getConfig(state, line.from).line
         if (!token) continue
         let indent = /^\s*/.exec(line.text)![0].length
         let empty = indent == line.length
