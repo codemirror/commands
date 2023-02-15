@@ -1,3 +1,11 @@
+## 6.2.1 (2023-02-15)
+
+### Bug fixes
+
+Keep cursor position stable in `cursorPageUp`/`cursorPageDown` when there are panels or other scroll margins active.
+
+Make sure `toggleComment` doesn't get thrown off by local language nesting, by fetching the language data for the start of the selection line.
+
 ## 6.2.0 (2023-01-18)
 
 ### New features
