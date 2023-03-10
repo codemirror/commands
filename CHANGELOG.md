@@ -1,3 +1,9 @@
+## 6.2.2 (2023-03-10)
+
+### Bug fixes
+
+Fix a bug where line commenting got confused when commenting a range that crossed language boundaries.
+
 ## 6.2.1 (2023-02-15)
 
 ### Bug fixes
