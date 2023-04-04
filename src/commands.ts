@@ -884,7 +884,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Shift-Alt-ArrowUp: [`copyLineUp`](#commands.copyLineUp)
 /// - Shift-Alt-ArrowDown: [`copyLineDown`](#commands.copyLineDown)
 /// - Escape: [`simplifySelection`](#commands.simplifySelection)
-/// - Ctrl-Enter (Comd-Enter on macOS): [`insertBlankLine`](#commands.insertBlankLine)
+/// - Ctrl-Enter (Cmd-Enter on macOS): [`insertBlankLine`](#commands.insertBlankLine)
 /// - Alt-l (Ctrl-l on macOS): [`selectLine`](#commands.selectLine)
 /// - Ctrl-i (Cmd-i on macOS): [`selectParentSyntax`](#commands.selectParentSyntax)
 /// - Ctrl-[ (Cmd-[ on macOS): [`indentLess`](#commands.indentLess)
