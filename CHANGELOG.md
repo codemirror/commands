@@ -1,3 +1,9 @@
+## 6.2.3 (2023-04-19)
+
+### Bug fixes
+
+Block commenting the selection no longer includes indentation on the first line.
+
 ## 6.2.2 (2023-03-10)
 
 ### Bug fixes
