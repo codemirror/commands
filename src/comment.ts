@@ -115,7 +115,7 @@ function selectedLineRanges(state: EditorState) {
     let toLine = r.to <= fromLine.to ? fromLine : state.doc.lineAt(r.to)
     let last = ranges.length - 1
     if (last >= 0 && ranges[last].to > fromLine.from) ranges[last].to = toLine.to
-    else ranges.push({from: fromLine.from, to: toLine.to})
+    else ranges.push({from: fromLine.from + /^\s*/.exec(fromLine.text)![0].length, to: toLine.to})
   }
   return ranges
 }
