@@ -77,6 +77,8 @@ function moveBySubword(view: EditorView, range: SelectionRange, forward: boolean
       if (done) return false
       pos += forward ? next.length : -next.length
       let nextCat = categorize(next), ahead
+      if (nextCat == CharCategory.Word && next.charCodeAt(0) < 128 && /[\W_]/.test(next))
+        nextCat = -1 // Treat word punctuation specially
       if (cat == CharCategory.Space) cat = nextCat
       if (cat != nextCat) return false
       if (cat == CharCategory.Word) {
