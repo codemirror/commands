@@ -1,3 +1,9 @@
+## 6.2.4 (2023-05-03)
+
+### Bug fixes
+
+The by-subword motion commands now properly treat dashes, underscores, and similar as subword separators.
+
 ## 6.2.3 (2023-04-19)
 
 ### Bug fixes
