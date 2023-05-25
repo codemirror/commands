@@ -32,7 +32,7 @@
     "@lezer/common": "^1.0.0"
   },
   "devDependencies": {
-    "@codemirror/buildhelper": "^0.1.5",
+    "@codemirror/buildhelper": "^1.0.0",
     "@codemirror/lang-javascript": "^6.0.0"
   },
   "repository": {
