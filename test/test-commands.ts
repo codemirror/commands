@@ -3,6 +3,7 @@ import {indentMore, indentLess, indentSelection, insertNewlineAndIndent,
         deleteTrailingWhitespace, deleteGroupForward, deleteGroupBackward,
         moveLineUp, moveLineDown} from "@codemirror/commands"
 import {javascriptLanguage} from "@codemirror/lang-javascript"
+import {indentUnit, StreamLanguage} from "@codemirror/language"
 import ist from "ist"
 import {mkState, stateStr} from "./state.js"
 
@@ -96,6 +97,49 @@ describe("commands", () => {
 
     it("doesn't try to explode already-exploded brackets", () =>
        test("foo(\n  |\n)", "foo(\n\n  |\n)"))
+
+    const miniLanguage = StreamLanguage.define<{}>({
+      startState() {
+        return {}
+      }
+
+      token(stream, state) {
+        if (stream.eatSpace()) return null
+        if (stream.match(/^\w+/)) return "variable"
+        stream.next()
+        return "invalid"
+      }
+
+      indent(state) {
+        // Inherit indentation from previous line.
+        return null
+      }
+    })
+
+    const miniLanguageWithTabs = [
+      miniLanguage,
+      indentUnit.of('\t'),
+      EditorState.tabSize.of(8),
+    ];
+
+    function testIndentationInheritedFromPreviousLine(from: string, to: string, lang: Extension = miniLanguage) {
+      ist(stateStr(cmd(mkState(from, lang), insertNewlineAndIndent)), to)
+    }
+
+    it("doesn't indent when previous line lacks indentation", () =>
+       testIndentationInheritedFromPreviousLine("foo|", "foo\n|"))
+
+    it("indents when previous line uses two space indentation", () =>
+       testIndentationInheritedFromPreviousLine("  foo|", "  foo\n  |"))
+
+    it("indents when previous line uses four space indentation", () =>
+       testIndentationInheritedFromPreviousLine("    foo|", "    foo\n    |"))
+
+    it("indents when previous line uses tab indentation", () =>
+       testIndentationInheritedFromPreviousLine("\tfoo|", "\tfoo\n\t|", miniLanguageWithTabs))
+
+    it("indents when previous line uses tab indentation and short alignment", () =>
+       testIndentationInheritedFromPreviousLine("\t    foo|", "\t    foo\n\t    |", miniLanguageWithTabs))
   })
 
   describe("deleteTrailingWhitespace", () => {
