@@ -677,7 +677,8 @@ function newlineAndIndent(atEof: boolean): StateCommand {
       if (atEof) from = to = (to <= line.to ? line : state.doc.lineAt(to)).to
       let cx = new IndentContext(state, {simulateBreak: from, simulateDoubleBreak: !!explode})
       let indent = getIndentation(cx, from)
-      if (indent == null) indent = /^\s*/.exec(state.doc.lineAt(from).text)![0].split('').reduce((acc, char) => acc + (char === '\t' ? state.tabSize : 1), 0)
+      if (indent == null)
+        indent = countColumn(/^\s*/.exec(state.doc.lineAt(from).text)![0], state.tabSize)
 
       while (to < line.to && /\s/.test(line.text[to - line.from])) to++
       if (explode) ({from, to} = explode)
