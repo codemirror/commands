@@ -51,6 +51,14 @@ describe("commands", () => {
 
     it("stops on dashes at end of word", () =>
       testCmd("one|--..", "one--|..", cursorSubwordForward, dashWordChar))
+
+    if (typeof Intl != "undefined" && (Intl as any).Segmenter) {
+      it("stops on CJK word boundaries", () => {
+        testCmd("|马在路上小跑着。", "马|在路上小跑着。", cursorSubwordForward)
+        testCmd("马|在路上小跑着。", "马在|路上小跑着。", cursorSubwordForward)
+        testCmd("马在|路上小跑着。", "马在路上|小跑着。", cursorSubwordForward)
+      })
+    }
   })
 
   describe("cursorSubwordBackward", () => {
@@ -80,5 +88,13 @@ describe("commands", () => {
 
     it("stops on dashes at end of word", () =>
       testCmd("..--one|", "..--|one", cursorSubwordBackward, dashWordChar))
+
+    if (typeof Intl != "undefined" && (Intl as any).Segmenter) {
+      it("stops on CJK word boundaries", () => {
+        testCmd("马在路上小跑着|。", "马在路上小跑|着。", cursorSubwordBackward)
+        testCmd("马在路上小跑|着。", "马在路上|小跑着。", cursorSubwordBackward)
+        testCmd("马在路上|小跑着。", "马在|路上小跑着。", cursorSubwordBackward)
+      })
+    }
   })
 })

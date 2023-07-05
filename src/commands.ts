@@ -68,37 +68,55 @@ export const cursorGroupForward: Command = view => cursorByGroup(view, true)
 /// Move the selection one group backward.
 export const cursorGroupBackward: Command = view => cursorByGroup(view, false)
 
+const segmenter = typeof Intl != "undefined" && (Intl as any).Segmenter ?
+  new ((Intl as any).Segmenter)(undefined, {granularity: "word"}) : null
+
 function moveBySubword(view: EditorView, range: SelectionRange, forward: boolean) {
   let categorize = view.state.charCategorizer(range.from)
-  return view.moveByChar(range, forward, start => {
-    let cat = CharCategory.Space, pos = range.from
-    let done = false, sawUpper = false, sawLower = false
-    let step = (next: string) => {
-      if (done) return false
-      pos += forward ? next.length : -next.length
-      let nextCat = categorize(next), ahead
-      if (nextCat == CharCategory.Word && next.charCodeAt(0) < 128 && /[\W_]/.test(next))
-        nextCat = -1 // Treat word punctuation specially
-      if (cat == CharCategory.Space) cat = nextCat
-      if (cat != nextCat) return false
-      if (cat == CharCategory.Word) {
-        if (next.toLowerCase() == next) {
-          if (!forward && sawUpper) return false
-          sawLower = true
-        } else if (sawLower) {
-          if (forward) return false
-          done = true
-        } else {
-          if (sawUpper && forward && categorize(ahead = view.state.sliceDoc(pos, pos + 1)) == CharCategory.Word &&
-              ahead.toLowerCase() == ahead) return false
-          sawUpper = true
-        }
+  let cat = CharCategory.Space, pos = range.from, steps = 0
+  let done = false, sawUpper = false, sawLower = false
+  let step = (next: string) => {
+    if (done) return false
+    pos += forward ? next.length : -next.length
+    let nextCat = categorize(next), ahead
+    if (nextCat == CharCategory.Word && next.charCodeAt(0) < 128 && /[\W_]/.test(next))
+      nextCat = -1 // Treat word punctuation specially
+    if (cat == CharCategory.Space) cat = nextCat
+    if (cat != nextCat) return false
+    if (cat == CharCategory.Word) {
+      if (next.toLowerCase() == next) {
+        if (!forward && sawUpper) return false
+        sawLower = true
+      } else if (sawLower) {
+        if (forward) return false
+        done = true
+      } else {
+        if (sawUpper && forward && categorize(ahead = view.state.sliceDoc(pos, pos + 1)) == CharCategory.Word &&
+          ahead.toLowerCase() == ahead) return false
+        sawUpper = true
       }
-      return true
     }
+    steps++
+    return true
+  }
+
+  let end = view.moveByChar(range, forward, start => {
     step(start)
     return step
   })
+
+  if (segmenter && cat == CharCategory.Word as any && end.from == range.from + steps * (forward ? 1 : -1)) {
+    let from = Math.min(range.head, end.head), to = Math.max(range.head, end.head)
+    let skipped = view.state.sliceDoc(from, to)
+    if (skipped.length > 1 && /[\u4E00-\uffff]/.test(skipped)) {
+      let segments = Array.from(segmenter.segment(skipped)) as {index: number}[]
+      if (segments.length > 1) {
+        if (forward) return EditorSelection.cursor(range.head + segments[1].index, -1)
+        return EditorSelection.cursor(end.head + segments[segments.length - 1].index, 1)
+      }
+    }
+  }
+  return end
 }
 
 function cursorBySubword(view: EditorView, forward: boolean) {
