@@ -671,7 +671,8 @@ function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: 
   let before = context.childBefore(pos), after = context.childAfter(pos), closedBy
   if (before && after && before.to <= pos && after.from >= pos &&
       (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 &&
-      state.doc.lineAt(before.to).from == state.doc.lineAt(after.from).from)
+      state.doc.lineAt(before.to).from == state.doc.lineAt(after.from).from &&
+      !/\S/.test(state.sliceDoc(before.to, after.from)))
     return {from: before.to, to: after.from}
   return null
 }
