@@ -1,3 +1,13 @@
+## 6.2.5 (2023-08-26)
+
+### Bug fixes
+
+Make `insertNewlineAndIndent` properly count indentation for tabs when copying over the previous line's indentation.
+
+The various sub-word motion commands will now use `Intl.Segmenter`, when available, to stop at CJK language word boundaries.
+
+Fix a bug in `insertNewlineAndIndent` that would delete text between brackets if it had no corresponding AST node.
+
 ## 6.2.4 (2023-05-03)
 
 ### Bug fixes
