@@ -1,3 +1,15 @@
+## 6.3.0 (2023-09-29)
+
+### Bug fixes
+
+Make it possible for `selectParentSyntax` to jump out of or into a syntax tree overlay.
+
+Make Cmd-Backspace and Cmd-Delete on macOS delete to the next line wrap point, not the start/end of the line.
+
+### New features
+
+The new `deleteLineBoundaryForward` and `deleteLineBoundaryBackward` commands delete to the start/end of the line or the next line wrapping point.
+
 ## 6.2.5 (2023-08-26)
 
 ### Bug fixes
