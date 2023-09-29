@@ -147,6 +147,10 @@ with key bindings for a lot of them.
 
 @deleteToLineEnd
 
+@deleteLineBoundaryBackward
+
+@deleteLineBoundaryForward
+
 @deleteTrailingWhitespace
 
 ### Line manipulation

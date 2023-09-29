@@ -427,13 +427,13 @@ export const simplifySelection: StateCommand = ({state, dispatch}) => {
   return true
 }
 
-function deleteBy(target: CommandTarget, by: (start: number) => number) {
+function deleteBy(target: CommandTarget, by: (start: SelectionRange) => number) {
   if (target.state.readOnly) return false
   let event = "delete.selection", {state} = target
   let changes = state.changeByRange(range => {
     let {from, to} = range
     if (from == to) {
-      let towards = by(from)
+      let towards = by(range)
       if (towards < from) {
         event = "delete.backward"
         towards = skipAtomic(target, towards, false)
@@ -447,7 +447,7 @@ function deleteBy(target: CommandTarget, by: (start: number) => number) {
       from = skipAtomic(target, from, false)
       to = skipAtomic(target, to, true)
     }
-    return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from)}
+    return from == to ? {range} : {changes: {from, to}, range: EditorSelection.cursor(from, from < range.head ? -1 : 1)}
   })
   if (changes.changes.empty) return false
   target.dispatch(state.update(changes, {
@@ -466,8 +466,8 @@ function skipAtomic(target: CommandTarget, pos: number, forward: boolean) {
   return pos
 }
 
-const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, pos => {
-  let {state} = target, line = state.doc.lineAt(pos), before, targetPos: number
+const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, range => {
+  let pos = range.from, {state} = target, line = state.doc.lineAt(pos), before, targetPos: number
   if (!forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
@@ -488,12 +488,12 @@ export const deleteCharBackward: Command = view => deleteByChar(view, false)
 /// Delete the selection or the character after the cursor.
 export const deleteCharForward: Command = view => deleteByChar(view, true)
 
-const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(target, start => {
-  let pos = start, {state} = target, line = state.doc.lineAt(pos)
+const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(target, range => {
+  let pos = range.head, {state} = target, line = state.doc.lineAt(pos)
   let categorize = state.charCategorizer(pos)
   for (let cat: CharCategory | null = null;;) {
     if (pos == (forward ? line.to : line.from)) {
-      if (pos == start && line.number != (forward ? state.doc.lines : 1))
+      if (pos == range.head && line.number != (forward ? state.doc.lines : 1))
         pos += forward ? 1 : -1
       break
     }
@@ -501,7 +501,7 @@ const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(targ
     let nextChar = line.text.slice(Math.min(pos, next) - line.from, Math.max(pos, next) - line.from)
     let nextCat = categorize(nextChar)
     if (cat != null && nextCat != cat) break
-    if (nextChar != " " || pos != start) cat = nextCat
+    if (nextChar != " " || pos != range.head) cat = nextCat
     pos = next
   }
   return pos
@@ -517,17 +517,31 @@ export const deleteGroupForward: StateCommand = target => deleteByGroup(target, 
 /// Delete the selection, or, if it is a cursor selection, delete to
 /// the end of the line. If the cursor is directly at the end of the
 /// line, delete the line break after it.
-export const deleteToLineEnd: Command = view => deleteBy(view, pos => {
-  let lineEnd = view.lineBlockAt(pos).to
-  return pos < lineEnd ? lineEnd : Math.min(view.state.doc.length, pos + 1)
+export const deleteToLineEnd: Command = view => deleteBy(view, range => {
+  let lineEnd = view.lineBlockAt(range.head).to
+  return range.head < lineEnd ? lineEnd : Math.min(view.state.doc.length, range.head + 1)
 })
 
 /// Delete the selection, or, if it is a cursor selection, delete to
 /// the start of the line. If the cursor is directly at the start of the
 /// line, delete the line break before it.
-export const deleteToLineStart: Command = view => deleteBy(view, pos => {
-  let lineStart = view.lineBlockAt(pos).from
-  return pos > lineStart ? lineStart : Math.max(0, pos - 1)
+export const deleteToLineStart: Command = view => deleteBy(view, range => {
+  let lineStart = view.lineBlockAt(range.head).from
+  return range.head > lineStart ? lineStart : Math.max(0, range.head - 1)
+})
+
+/// Delete the selection, or, if it is a cursor selection, delete to
+/// the start of the line or the next line wrap before the cursor.
+export const deleteLineBoundaryBackward: Command = view => deleteBy(view, range => {
+  let lineStart = view.moveToLineBoundary(range, false).head
+  return range.head > lineStart ? lineStart : Math.max(0, range.head - 1)
+})
+
+/// Delete the selection, or, if it is a cursor selection, delete to
+/// the end of the line or the next line wrap after the cursor.
+export const deleteLineBoundaryForward: Command = view => deleteBy(view, range => {
+  let lineStart = view.moveToLineBoundary(range, true).head
+  return range.head < lineStart ? lineStart : Math.min(view.state.doc.length, range.head + 1)
 })
 
 /// Delete all whitespace directly before a line end from the
@@ -859,8 +873,8 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - Delete: [`deleteCharForward`](#commands.deleteCharForward)
 ///  - Ctrl-Backspace (Alt-Backspace on macOS): [`deleteGroupBackward`](#commands.deleteGroupBackward)
 ///  - Ctrl-Delete (Alt-Delete on macOS): [`deleteGroupForward`](#commands.deleteGroupForward)
-///  - Cmd-Backspace (macOS): [`deleteToLineStart`](#commands.deleteToLineStart).
-///  - Cmd-Delete (macOS): [`deleteToLineEnd`](#commands.deleteToLineEnd).
+///  - Cmd-Backspace (macOS): [`deleteLineBoundaryBackward`](#commands.deleteLineBoundaryBackward).
+///  - Cmd-Delete (macOS): [`deleteLineBoundaryForward`](#commands.deleteLineBoundaryForward).
 export const standardKeymap: readonly KeyBinding[] = ([
   {key: "ArrowLeft", run: cursorCharLeft, shift: selectCharLeft, preventDefault: true},
   {key: "Mod-ArrowLeft", mac: "Alt-ArrowLeft", run: cursorGroupLeft, shift: selectGroupLeft, preventDefault: true},
@@ -895,8 +909,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
   {key: "Delete", run: deleteCharForward},
   {key: "Mod-Backspace", mac: "Alt-Backspace", run: deleteGroupBackward},
   {key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward},
-  {mac: "Mod-Backspace", run: deleteToLineStart},
-  {mac: "Mod-Delete", run: deleteToLineEnd}
+  {mac: "Mod-Backspace", run: deleteLineBoundaryBackward},
+  {mac: "Mod-Delete", run: deleteLineBoundaryForward}
 ] as KeyBinding[]).concat(emacsStyleKeymap.map(b => ({mac: b.key, run: b.run, shift: b.shift})))
 
 /// The default keymap. Includes all bindings from
