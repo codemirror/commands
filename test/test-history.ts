@@ -63,7 +63,7 @@ describe("history", () => {
 
   it("puts the cursor after the change on redo", () => {
     let state = mkState({}, "one\n\ntwo")
-    state = state.update({changes: {from: 3, insert: "!"}}).state
+    state = state.update({changes: {from: 3, insert: "!"}, selection: {anchor: 4}}).state
     state = state.update({selection: {anchor: state.doc.length}}).state
     state = command(state, undo)
     state = command(state, redo)
@@ -357,6 +357,17 @@ describe("history", () => {
     state = command(state, undo)
     ist(state.doc.toString(), "xabcy")
     ist(state.selection.ranges.map(r => r.from).join(","), "0,2,3")
+  })
+
+  it("restores selection on redo", () => {
+    let state = mkState({}, "a\nb\nc\n")
+    state = state.update({selection: EditorSelection.create([1, 3, 5].map(n => EditorSelection.cursor(n)))}).state
+    state = state.update(state.replaceSelection("-")).state
+    state = state.update({selection:  {anchor: 0}}).state
+    state = command(state, undo)
+    state = state.update({selection:  {anchor: 0}}).state
+    state = command(state, redo)
+    ist(state.selection.ranges.map(r => r.head).join(","), "2,5,8")
   })
 
   describe("undoSelection", () => {

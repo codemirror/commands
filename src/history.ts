@@ -4,7 +4,7 @@ import {KeyBinding, EditorView} from "@codemirror/view"
 
 const enum BranchName { Done, Undone }
 
-const fromHistory = Annotation.define<{side: BranchName, rest: Branch}>()
+const fromHistory = Annotation.define<{side: BranchName, rest: Branch, selection: EditorSelection}>()
 
 /// Transaction annotation that will prevent that transaction from
 /// being combined with other transactions in the undo history. Given
@@ -47,12 +47,6 @@ const historyConfig = Facet.define<HistoryConfig, Required<HistoryConfig>>({
   }
 })
 
-function changeEnd(changes: ChangeDesc) {
-  let end = 0
-  changes.iterChangedRanges((_, to) => end = to)
-  return end
-}
-
 const historyField_ = StateField.define({
   create() {
     return HistoryState.empty
@@ -63,8 +57,7 @@ const historyField_ = StateField.define({
 
     let fromHist = tr.annotation(fromHistory)
     if (fromHist) {
-      let selection = tr.docChanged ? EditorSelection.single(changeEnd(tr.changes)) : undefined
-      let item = HistEvent.fromTransaction(tr, selection), from = fromHist.side
+      let item = HistEvent.fromTransaction(tr, fromHist.selection), from = fromHist.side
       let other = from == BranchName.Done ? state.undone : state.done
       if (item) other = updateBranch(other, other.length, config.minDepth, item)
       else other = addSelection(other, tr.startState.selection)
@@ -358,14 +351,14 @@ class HistoryState {
                             this.prevTime, this.prevUserEvent)
   }
 
-  pop(side: BranchName, state: EditorState, selection: boolean): Transaction | null {
+  pop(side: BranchName, state: EditorState, onlySelection: boolean): Transaction | null {
     let branch = side == BranchName.Done ? this.done : this.undone
     if (branch.length == 0) return null
-    let event = branch[branch.length - 1]
-    if (selection && event.selectionsAfter.length) {
+    let event = branch[branch.length - 1], selection = event.selectionsAfter[0] || state.selection
+    if (onlySelection && event.selectionsAfter.length) {
       return state.update({
         selection: event.selectionsAfter[event.selectionsAfter.length - 1],
-        annotations: fromHistory.of({side, rest: popSelection(branch)}),
+        annotations: fromHistory.of({side, rest: popSelection(branch), selection}),
         userEvent: side == BranchName.Done ? "select.undo" : "select.redo",
         scrollIntoView: true
       })
@@ -378,7 +371,7 @@ class HistoryState {
         changes: event.changes,
         selection: event.startSelection,
         effects: event.effects,
-        annotations: fromHistory.of({side, rest}),
+        annotations: fromHistory.of({side, rest, selection}),
         filter: false,
         userEvent: side == BranchName.Done ? "undo" : "redo",
         scrollIntoView: true
