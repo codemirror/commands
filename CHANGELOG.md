@@ -1,3 +1,11 @@
+## 6.3.1 (2023-11-27)
+
+### Bug fixes
+
+When undoing, store the selection after the undone change with the redo event, so that redoing restores it.
+
+`deleteCharBackward` will no longer delete variant selector characters as separate characters.
+
 ## 6.3.0 (2023-09-29)
 
 ### Bug fixes
