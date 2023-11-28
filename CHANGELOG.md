@@ -1,3 +1,9 @@
+## 6.3.2 (2023-11-28)
+
+### Bug fixes
+
+Fix a regression that caused `deleteCharBackward` to sometimes delete a large chunk of text.
+
 ## 6.3.1 (2023-11-27)
 
 ### Bug fixes
