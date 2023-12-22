@@ -25,7 +25,7 @@ type CommandTarget = {state: EditorState, dispatch: (tr: Transaction) => void}
 function moveSel({state, dispatch}: CommandTarget,
                  how: (range: SelectionRange) => SelectionRange): boolean {
   let selection = updateSel(state.selection, how)
-  if (selection.eq(state.selection)) return false
+  if (selection.eq(state.selection, true)) return false
   dispatch(setSel(state, selection))
   return true
 }
