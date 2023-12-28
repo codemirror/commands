@@ -1,3 +1,9 @@
+## 6.3.3 (2023-12-28)
+
+### Bug fixes
+
+Fix an issue causing cursor motion commands to not dispatch a transaction when the change only affects cursor associativity.
+
 ## 6.3.2 (2023-11-28)
 
 ### Bug fixes
