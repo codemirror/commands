@@ -673,7 +673,14 @@ export const deleteLine: Command = view => {
     else if (to < state.doc.length) to++
     return {from, to}
   }))
-  let selection = updateSel(state.selection, range => view.moveVertically(range, true)).map(changes)
+  let selection = updateSel(state.selection, range => {
+    let dist: number | undefined = undefined
+    if (view.lineWrapping) {
+      let block = view.lineBlockAt(range.head), pos = view.coordsAtPos(range.head, range.assoc || 1)
+      if (pos) dist = (block.bottom + view.documentTop) - pos.bottom + view.defaultLineHeight / 2
+    }
+    return view.moveVertically(range, true, dist)
+  }).map(changes)
   view.dispatch({changes, selection, scrollIntoView: true, userEvent: "delete.line"})
   return true
 }
