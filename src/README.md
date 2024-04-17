@@ -137,6 +137,8 @@ with key bindings for a lot of them.
 
 @deleteCharBackward
 
+@deleteCharBackwardStrict
+
 @deleteCharForward
 
 @deleteGroupBackward

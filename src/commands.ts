@@ -466,9 +466,9 @@ function skipAtomic(target: CommandTarget, pos: number, forward: boolean) {
   return pos
 }
 
-const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(target, range => {
+const deleteByChar = (target: CommandTarget, forward: boolean, byIndentUnit: boolean) => deleteBy(target, range => {
   let pos = range.from, {state} = target, line = state.doc.lineAt(pos), before, targetPos: number
-  if (!forward && pos > line.from && pos < line.from + 200 &&
+  if (byIndentUnit && !forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
     let col = countColumn(before, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state)
@@ -484,11 +484,17 @@ const deleteByChar = (target: CommandTarget, forward: boolean) => deleteBy(targe
   return targetPos
 })
 
-/// Delete the selection, or, for cursor selections, the character
-/// before the cursor.
-export const deleteCharBackward: Command = view => deleteByChar(view, false)
+/// Delete the selection, or, for cursor selections, the character or
+/// indentation unit before the cursor.
+export const deleteCharBackward: Command = view => deleteByChar(view, false, true)
+
+/// Delete the selection or the character before the cursor. Does not
+/// implement any extended behavior like deleting whole indentation
+/// units in one go.
+export const deleteCharBackwardStrict: Command = view => deleteByChar(view, false, false)
+
 /// Delete the selection or the character after the cursor.
-export const deleteCharForward: Command = view => deleteByChar(view, true)
+export const deleteCharForward: Command = view => deleteByChar(view, true, false)
 
 const deleteByGroup = (target: CommandTarget, forward: boolean) => deleteBy(target, range => {
   let pos = range.head, {state} = target, line = state.doc.lineAt(pos)
