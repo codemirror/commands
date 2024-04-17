@@ -1,3 +1,13 @@
+## 6.4.0 (2024-04-17)
+
+### Bug fixes
+
+Fix an issue where `deleteLine` sometimes leaves the cursor on the wrong line.
+
+### New features
+
+The new `deleteCharBackwardStrict` command just deletes a character, without further smart behavior around indentation.
+
 ## 6.3.3 (2023-12-28)
 
 ### Bug fixes
