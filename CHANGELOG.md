@@ -1,3 +1,9 @@
+## 6.5.0 (2024-04-19)
+
+### New features
+
+The `insertNewlineKeepIndent` command inserts a newline along with the same indentation as the line before.
+
 ## 6.4.0 (2024-04-17)
 
 ### Bug fixes
