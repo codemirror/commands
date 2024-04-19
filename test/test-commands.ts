@@ -1,5 +1,6 @@
 import {EditorState, StateCommand, Extension} from "@codemirror/state"
-import {indentMore, indentLess, indentSelection, insertNewlineAndIndent,
+import {indentMore, indentLess, indentSelection,
+        insertNewlineAndIndent, insertNewlineKeepIndent,
         deleteTrailingWhitespace, deleteGroupForward, deleteGroupBackward,
         moveLineUp, moveLineDown} from "@codemirror/commands"
 import {javascriptLanguage} from "@codemirror/lang-javascript"
@@ -64,6 +65,21 @@ describe("commands", () => {
 
     it("includes previous indentation changes in relative indentation", () =>
        test("<{\n{\n{\n{}\n}\n}\n}>", "<{\n  {\n    {\n      {}\n    }\n  }\n}>"))
+  })
+
+  describe("insertNewlineKeepIndent", () => {
+    function test(from: string, to: string) {
+      ist(stateStr(cmd(mkState(from), insertNewlineKeepIndent)), to)
+    }
+
+    it("keeps indentation", () =>
+      test("  one|", "  one\n  |"))
+
+    it("keeps zero indentation", () =>
+      test("one|two", "one\n|two"))
+
+    it("deletes the selection", () =>
+      test("if x:\n  one<two\n  three>four", "if x:\n  one\n  |four"))
   })
 
   describe("insertNewlineAndIndent", () => {

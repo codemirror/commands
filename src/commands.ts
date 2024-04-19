@@ -697,6 +697,19 @@ export const insertNewline: StateCommand = ({state, dispatch}) => {
   return true
 }
 
+/// Replace the selection with a newline and the same amount of
+/// indentation as the line above.
+export const insertNewlineKeepIndent: StateCommand = ({state, dispatch}) => {
+  dispatch(state.update(state.changeByRange(range => {
+    let indent = /^\s*/.exec(state.doc.lineAt(range.from).text)![0]
+    return {
+      changes: {from: range.from, to: range.to, insert: state.lineBreak + indent},
+      range: EditorSelection.cursor(range.from + indent.length + 1)
+    }
+  }), {scrollIntoView: true, userEvent: "input"}))
+  return true
+}
+
 function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: number} | null {
   if (/\(\)|\[\]|\{\}/.test(state.sliceDoc(pos - 1, pos + 1))) return {from: pos, to: pos}
   let context = syntaxTree(state).resolveInner(pos)

@@ -187,6 +187,8 @@ with key bindings for a lot of them.
 
 @insertNewlineAndIndent
 
+@insertNewlineKeepIndent
+
 @insertBlankLine
 
 ### Undo History
