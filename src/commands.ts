@@ -825,6 +825,24 @@ export const indentLess: StateCommand = ({state, dispatch}) => {
   return true
 }
 
+/// Enables or disables
+/// [tab-focus mode](#view.EditorView.setTabFocusMode). While on, this
+/// prevents the editor's key bindings from capturing Tab or
+/// Shift-Tab, making it possible for the user to move focus out of
+/// the editor with the keyboard.
+export const toggleTabFocusMode: Command = view => {
+  view.setTabFocusMode()
+  return true
+}
+
+/// Temporarily enables [tab-focus
+/// mode](#view.EditorView.setTabFocusMode) for two seconds or until
+/// another key is pressed.
+export const temporarilySetTabFocusMode: Command = view => {
+  view.setTabFocusMode(2000)
+  return true
+}
+
 /// Insert a tab character at the cursor or, if something is selected,
 /// use [`indentMore`](#commands.indentMore) to indent the entire
 /// selection.
@@ -961,6 +979,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Shift-Ctrl-\\ (Shift-Cmd-\\ on macOS): [`cursorMatchingBracket`](#commands.cursorMatchingBracket)
 /// - Ctrl-/ (Cmd-/ on macOS): [`toggleComment`](#commands.toggleComment).
 /// - Shift-Alt-a: [`toggleBlockComment`](#commands.toggleBlockComment).
+/// - Ctrl-m (Alt-Shift-m on macOS): [`toggleTabFocusMode`](#commands.toggleTabFocusMode).
 export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Alt-ArrowLeft", mac: "Ctrl-ArrowLeft", run: cursorSyntaxLeft, shift: selectSyntaxLeft},
   {key: "Alt-ArrowRight", mac: "Ctrl-ArrowRight", run: cursorSyntaxRight, shift: selectSyntaxRight},
@@ -986,7 +1005,9 @@ export const defaultKeymap: readonly KeyBinding[] = ([
   {key: "Shift-Mod-\\", run: cursorMatchingBracket},
 
   {key: "Mod-/", run: toggleComment},
-  {key: "Alt-A", run: toggleBlockComment}
+  {key: "Alt-A", run: toggleBlockComment},
+
+  {key: "Ctrl-m", mac: "Shift-Alt-m", run: toggleTabFocusMode},
 ] as readonly KeyBinding[]).concat(standardKeymap)
 
 /// A binding that binds Tab to [`indentMore`](#commands.indentMore) and

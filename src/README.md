@@ -234,3 +234,9 @@ with key bindings for a lot of them.
 @blockUncomment
 
 @toggleBlockCommentByLine
+
+### Tab Focus Mode
+
+@toggleTabFocusMode
+
+@temporarilySetTabFocusMode
