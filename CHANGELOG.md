@@ -1,3 +1,11 @@
+## 6.6.0 (2024-06-04)
+
+### New features
+
+The new `toggleTabFocusMode` and `temporarilySetTabFocusMode` commands provide control over the view's tab-focus mode.
+
+The default keymap now binds Ctrl-m (Shift-Alt-m on macOS) to `toggleTabFocusMode`.
+
 ## 6.5.0 (2024-04-19)
 
 ### New features
