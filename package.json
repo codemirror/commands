@@ -1,6 +1,6 @@
 {
   "name": "@codemirror/commands",
-  "version": "6.6.0",
+  "version": "6.6.1",
   "description": "Collection of editing commands for the CodeMirror code editor",
   "scripts": {
     "test": "cm-runtests",

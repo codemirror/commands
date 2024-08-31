@@ -1,3 +1,9 @@
+## 6.6.1 (2024-08-31)
+
+### Bug fixes
+
+Fix a bug in the undo history that would cause it to incorrectly track inverted effects when adding multiple edits to a single history event.
+
 ## 6.6.0 (2024-06-04)
 
 ### New features
