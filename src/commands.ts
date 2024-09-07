@@ -401,7 +401,11 @@ export const selectLine: StateCommand = ({state, dispatch}) => {
 /// syntax tree.
 export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
   let selection = updateSel(state.selection, range => {
-    let stack = syntaxTree(state).resolveStack(range.from, 1)
+    let tree = syntaxTree(state), stack = tree.resolveStack(range.from, 1)
+    if (range.empty) {
+      let stackBefore = tree.resolveStack(range.from, -1)
+      if (stackBefore.node.from >= stack.node.from && stackBefore.node.to <= stack.node.to) stack = stackBefore
+    }
     for (let cur: typeof stack | null = stack; cur; cur = cur.next) {
       let {node} = cur
       if (((node.from < range.from && node.to >= range.to) ||
