@@ -415,6 +415,7 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
     }
     return range
   })
+  if (selection.eq(state.selection)) return false
   dispatch(setSel(state, selection))
   return true
 }
