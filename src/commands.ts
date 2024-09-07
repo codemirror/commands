@@ -406,7 +406,7 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
       let {node} = cur
       if (((node.from < range.from && node.to >= range.to) ||
            (node.to > range.to && node.from <= range.from)) &&
-          node.parent?.parent)
+           cur.next)
         return EditorSelection.range(node.to, node.from)
     }
     return range
