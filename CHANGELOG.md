@@ -1,3 +1,11 @@
+## 6.6.2 (2024-09-17)
+
+### Bug fixes
+
+Fix an issue causing `selectParentSyntax` to not select syntax that is a direct child of the top node.
+
+Make `selectParentSyntax` return false when it doesn't change the selection.
+
 ## 6.6.1 (2024-08-31)
 
 ### Bug fixes
