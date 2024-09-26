@@ -918,7 +918,7 @@ export const emacsStyleKeymap: readonly KeyBinding[] = [
 ///  - End: [`cursorLineBoundaryForward`](#commands.cursorLineBoundaryForward) ([`selectLineBoundaryForward`](#commands.selectLineBoundaryForward) with Shift)
 ///  - Ctrl-Home (Cmd-Home on macOS): [`cursorDocStart`](#commands.cursorDocStart) ([`selectDocStart`](#commands.selectDocStart) with Shift)
 ///  - Ctrl-End (Cmd-Home on macOS): [`cursorDocEnd`](#commands.cursorDocEnd) ([`selectDocEnd`](#commands.selectDocEnd) with Shift)
-///  - Enter: [`insertNewlineAndIndent`](#commands.insertNewlineAndIndent)
+///  - Enter and Shift-Enter: [`insertNewlineAndIndent`](#commands.insertNewlineAndIndent)
 ///  - Ctrl-a (Cmd-a on macOS): [`selectAll`](#commands.selectAll)
 ///  - Backspace: [`deleteCharBackward`](#commands.deleteCharBackward)
 ///  - Delete: [`deleteCharForward`](#commands.deleteCharForward)
@@ -952,7 +952,7 @@ export const standardKeymap: readonly KeyBinding[] = ([
   {key: "End", run: cursorLineBoundaryForward, shift: selectLineBoundaryForward, preventDefault: true},
   {key: "Mod-End", run: cursorDocEnd, shift: selectDocEnd},
 
-  {key: "Enter", run: insertNewlineAndIndent},
+  {key: "Enter", run: insertNewlineAndIndent, shift: insertNewlineAndIndent},
 
   {key: "Mod-a", run: selectAll},
 
