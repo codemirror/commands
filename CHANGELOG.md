@@ -1,3 +1,13 @@
+## 6.7.0 (2024-10-07)
+
+### Bug fixes
+
+Bind Shift-Enter to the same command as Enter in the default keymap, so that it doesn't do nothing when on an EditContext-supporting browser.
+
+### New features
+
+Add commands for by-string-index cursor motion that ignores text direction.
+
 ## 6.6.2 (2024-09-17)
 
 ### Bug fixes
