@@ -53,6 +53,27 @@ export const cursorCharForward: Command = view => cursorByChar(view, true)
 /// Move the selection one character backward.
 export const cursorCharBackward: Command = view => cursorByChar(view, false)
 
+function byCharLogical(state: EditorState, range: SelectionRange, forward: boolean) {
+  let pos = range.head, line = state.doc.lineAt(pos)
+  if (pos == (forward ? line.to : line.from))
+    pos = forward ? Math.min(state.doc.length, line.to + 1) : Math.max(0, line.from - 1)
+  else
+    pos = line.from + findClusterBreak(line.text, pos - line.from, forward)
+  return EditorSelection.cursor(pos, forward ? -1 : 1)
+}
+
+function moveByCharLogical(target: CommandTarget, forward: boolean) {
+  return moveSel(target, range => range.empty ? byCharLogical(target.state, range, forward) : rangeEnd(range, forward))
+}
+
+/// Move the selection one character forward, in logical
+/// (non-text-direction-aware) string index order.
+export const cursorCharForwardLogical: StateCommand = target => moveByCharLogical(target, true)
+
+/// Move the selection one character backward, in logical string index
+/// order.
+export const cursorCharBackwardLogical: StateCommand = target => moveByCharLogical(target, false)
+
 function cursorByGroup(view: EditorView, forward: boolean) {
   return moveSel(view, range => range.empty ? view.moveByGroup(range, forward) : rangeEnd(range, forward))
 }
@@ -268,13 +289,13 @@ export const cursorMatchingBracket: StateCommand = ({state, dispatch}) => toMatc
 /// head is currently on, if any.
 export const selectMatchingBracket: StateCommand = ({state, dispatch}) => toMatchingBracket(state, dispatch, true)
 
-function extendSel(view: EditorView, how: (range: SelectionRange) => SelectionRange): boolean {
-  let selection = updateSel(view.state.selection, range => {
+function extendSel(target: CommandTarget, how: (range: SelectionRange) => SelectionRange): boolean {
+  let selection = updateSel(target.state.selection, range => {
     let head = how(range)
     return EditorSelection.range(range.anchor, head.head, head.goalColumn, head.bidiLevel || undefined)
   })
-  if (selection.eq(view.state.selection)) return false
-  view.dispatch(setSel(view.state, selection))
+  if (selection.eq(target.state.selection)) return false
+  target.dispatch(setSel(target.state, selection))
   return true
 }
 
@@ -292,6 +313,15 @@ export const selectCharRight: Command = view => selectByChar(view, ltrAtCursor(v
 export const selectCharForward: Command = view => selectByChar(view, true)
 /// Move the selection head one character backward.
 export const selectCharBackward: Command = view => selectByChar(view, false)
+
+/// Move the selection head one character forward by logical
+/// (non-direction aware) string index order.
+export const selectCharForwardLogical: StateCommand =
+  target => extendSel(target, range => byCharLogical(target.state, range, true))
+/// Move the selection head one character backward by logical string
+/// index order.
+export const selectCharBackwardLogical: StateCommand =
+  target => extendSel(target, range => byCharLogical(target.state, range, false))
 
 function selectByGroup(view: EditorView, forward: boolean) {
   return extendSel(view, range => view.moveByGroup(range, forward))

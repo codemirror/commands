@@ -33,6 +33,14 @@ with key bindings for a lot of them.
 
 @selectCharBackward
 
+@cursorCharForwardLogical
+
+@selectCharForwardLogical
+
+@cursorCharBackwardLogical
+
+@selectCharBackwardLogical
+
 #### By group
 
 @cursorGroupLeft
