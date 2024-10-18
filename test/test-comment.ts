@@ -185,6 +185,14 @@ describe("comment", () => {
         checkLine(`on|e\nt|w|o\nth|ree`,
                   `${o} on|e\nt|w|o\nth|ree ${c}`)
       })
+
+      it("doesn't include lines that the selection stops at the start of", () => {
+        checkLine(`|one\n|two`, `${o} |one ${c}\n|two`)
+      })
+
+      it("does include lines with cursor selection at the start", () => {
+        checkLine(`|one\ntwo`, `|${o} one ${c}\ntwo`)
+      })
     })
   }
 
