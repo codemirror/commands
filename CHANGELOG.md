@@ -1,3 +1,9 @@
+## 6.7.1 (2024-10-21)
+
+### Bug fixes
+
+Change `toggleBlockCommentByLine` to not affect lines with the selection end right at their start.
+
 ## 6.7.0 (2024-10-07)
 
 ### Bug fixes
