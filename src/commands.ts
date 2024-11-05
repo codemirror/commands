@@ -1,5 +1,5 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
-        ChangeSpec, Transaction, CharCategory,
+        StateEffect, ChangeSpec, Transaction, CharCategory,
         findClusterBreak, Text, Line, countColumn} from "@codemirror/state"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
@@ -218,7 +218,7 @@ function cursorByPage(view: EditorView, forward: boolean) {
       : rangeEnd(range, forward)
   })
   if (selection.eq(state.selection)) return false
-  let effect
+  let effect: StateEffect<any> | undefined
   if (page.selfScroll) {
     let startPos = view.coordsAtPos(state.selection.main.head)
     let scrollRect = view.scrollDOM.getBoundingClientRect()
