@@ -1,3 +1,9 @@
+## 6.8.0 (2025-01-08)
+
+### New features
+
+The new `cursorGroupForwardWin` and `selectGroupForwardWin` commands implement Windows-style forward motion by group.
+
 ## 6.7.1 (2024-10-21)
 
 ### Bug fixes
