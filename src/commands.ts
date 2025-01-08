@@ -1,6 +1,6 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
         StateEffect, ChangeSpec, Transaction, CharCategory,
-        findClusterBreak, Text, Line, countColumn} from "@codemirror/state"
+        findClusterBreak, Text, Line, countColumn, CharCategory} from "@codemirror/state"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
         getIndentation, matchBrackets} from "@codemirror/language"
@@ -88,6 +88,25 @@ export const cursorGroupRight: Command = view => cursorByGroup(view, ltrAtCursor
 export const cursorGroupForward: Command = view => cursorByGroup(view, true)
 /// Move the selection one group backward.
 export const cursorGroupBackward: Command = view => cursorByGroup(view, false)
+
+function toGroupStart(view: EditorView, pos: number, start: string) {
+  let categorize = view.state.charCategorizer(pos)
+  let cat = categorize(start), initial = cat != CharCategory.Space
+  return (next: string) => {
+    let nextCat = categorize(next)
+    if (nextCat != CharCategory.Space) return initial && nextCat == cat
+    initial = false
+    return true
+  }
+}
+
+/// Move the cursor one group forward in the default Windows style,
+/// where it moves to the start of the next group.
+export const cursorGroupForwardWin: Command = view => {
+  return moveSel(view, range => range.empty
+    ? view.moveByChar(range, true, start => toGroupStart(view, range.head, start))
+    : rangeEnd(range, true))
+}
 
 const segmenter = typeof Intl != "undefined" && (Intl as any).Segmenter ?
   new ((Intl as any).Segmenter)(undefined, {granularity: "word"}) : null
@@ -337,6 +356,12 @@ export const selectGroupRight: Command = view => selectByGroup(view, ltrAtCursor
 export const selectGroupForward: Command = view => selectByGroup(view, true)
 /// Move the selection head one group backward.
 export const selectGroupBackward: Command = view => selectByGroup(view, false)
+
+/// Move the selection head one group forward in the default Windows
+/// style, skipping to the start of the next group.
+export const selectGroupForwardWin: Command = view => {
+  return extendSel(view, range => view.moveByChar(range, true, start => toGroupStart(view, range.head, start)))
+}
 
 function selectBySubword(view: EditorView, forward: boolean) {
   return extendSel(view, range => moveBySubword(view, range, forward))

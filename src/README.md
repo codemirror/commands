@@ -59,6 +59,10 @@ with key bindings for a lot of them.
 
 @selectGroupBackward
 
+@cursorGroupForwardWin
+
+@selectGroupForwardWin
+
 @cursorSubwordForward
 
 @selectSubwordForward
