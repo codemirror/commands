@@ -1,5 +1,5 @@
 import {EditorState, StateCommand, EditorSelection, SelectionRange,
-        StateEffect, ChangeSpec, Transaction, CharCategory,
+        StateEffect, ChangeSpec, Transaction,
         findClusterBreak, Text, Line, countColumn, CharCategory} from "@codemirror/state"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
