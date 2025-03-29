@@ -61,7 +61,7 @@ export const toggleBlockCommentByLine =
   command((o, s) => changeBlockComment(o, s, selectedLineRanges(s)), CommentOption.Toggle)
 
 function getConfig(state: EditorState, pos: number) {
-  let data = state.languageDataAt<CommentTokens>("commentTokens", pos)
+  let data = state.languageDataAt<CommentTokens>("commentTokens", pos, 1)
   return data.length ? data[0] : {}
 }
 
