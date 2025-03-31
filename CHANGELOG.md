@@ -1,3 +1,9 @@
+## 6.8.1 (2025-03-31)
+
+### Bug fixes
+
+Fix an issue where creating a comment for a line that starts an inner language would use the comment style from the outer language.
+
 ## 6.8.0 (2025-01-08)
 
 ### New features
