@@ -475,6 +475,35 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
   return true
 }
 
+function addCursorVertically(view: EditorView, forward: boolean) {
+  let {state} = view, sel = state.selection
+  for (let range of state.selection.ranges) {
+    let line = state.doc.lineAt(range.head)
+    if (forward ? line.to < view.state.doc.length : line.from > 0) for (let cur = range;;) {
+      let next = view.moveVertically(cur, forward)
+      if (next.head < line.from || next.head > line.to) {
+        sel = sel.addRange(next)
+        break
+      } else if (next.head == cur.head) {
+        break
+      } else {
+        cur = next
+      }
+    }
+  }
+  if (sel == state.selection) return false
+  view.dispatch(setSel(view.state, sel))
+  return true
+}
+
+/// Expand the selection by adding a cursor above the heads of
+/// currently selected ranges.
+export const addCursorAbove: Command = view => addCursorVertically(view, false)
+
+/// Expand the selection by adding a cursor below the heads of
+/// currently selected ranges.
+export const addCursorBelow: Command = view => addCursorVertically(view, true)
+
 /// Simplify the current selection. When multiple ranges are selected,
 /// reduce it to its main range. Otherwise, if the selection is
 /// non-empty, convert it to a cursor selection.
@@ -1028,6 +1057,8 @@ export const standardKeymap: readonly KeyBinding[] = ([
 /// - Alt-ArrowDown: [`moveLineDown`](#commands.moveLineDown)
 /// - Shift-Alt-ArrowUp: [`copyLineUp`](#commands.copyLineUp)
 /// - Shift-Alt-ArrowDown: [`copyLineDown`](#commands.copyLineDown)
+/// - Ctrl-Alt-ArrowUp (Cmd-Alt-ArrowUp on macOS): [`addCursorAbove`](#commands.addCursorAbove).
+/// - Ctrl-Alt-ArrowDown (Cmd-Alt-ArrowDown on macOS): [`addCursorBelow`](#commands.addCursorBelow).
 /// - Escape: [`simplifySelection`](#commands.simplifySelection)
 /// - Ctrl-Enter (Cmd-Enter on macOS): [`insertBlankLine`](#commands.insertBlankLine)
 /// - Alt-l (Ctrl-l on macOS): [`selectLine`](#commands.selectLine)
@@ -1049,6 +1080,9 @@ export const defaultKeymap: readonly KeyBinding[] = ([
 
   {key: "Alt-ArrowDown", run: moveLineDown},
   {key: "Shift-Alt-ArrowDown", run: copyLineDown},
+
+  {key: "Mod-Alt-ArrowUp", run: addCursorAbove},
+  {key: "Mod-Alt-ArrowDown", run: addCursorBelow},
 
   {key: "Escape", run: simplifySelection},
   {key: "Mod-Enter", run: insertBlankLine},

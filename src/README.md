@@ -89,6 +89,10 @@ with key bindings for a lot of them.
 
 @selectPageDown
 
+@addCursorAbove
+
+@addCursorBelow
+
 #### By line boundary
 
 @cursorLineBoundaryForward
