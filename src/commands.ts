@@ -476,13 +476,13 @@ export const selectParentSyntax: StateCommand = ({state, dispatch}) => {
 }
 
 function addCursorVertically(view: EditorView, forward: boolean) {
-  let {state} = view, sel = state.selection
+  let {state} = view, sel = state.selection, ranges: SelectionRange[] = state.selection.ranges.slice()
   for (let range of state.selection.ranges) {
     let line = state.doc.lineAt(range.head)
     if (forward ? line.to < view.state.doc.length : line.from > 0) for (let cur = range;;) {
       let next = view.moveVertically(cur, forward)
       if (next.head < line.from || next.head > line.to) {
-        sel = sel.addRange(next)
+        if (!ranges.some(r => r.head == next.head)) ranges.push(next)
         break
       } else if (next.head == cur.head) {
         break
@@ -491,8 +491,8 @@ function addCursorVertically(view: EditorView, forward: boolean) {
       }
     }
   }
-  if (sel == state.selection) return false
-  view.dispatch(setSel(view.state, sel))
+  if (ranges.length == sel.ranges.length) return false
+  view.dispatch(setSel(state, EditorSelection.create(ranges, ranges.length - 1)))
   return true
 }
 
