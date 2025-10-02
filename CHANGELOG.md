@@ -1,3 +1,13 @@
+## 6.9.0 (2025-10-02)
+
+### Bug fixes
+
+Prevent the default behavior of backspace and delete keys, to prevent the browser from doing anything creative when there's nothing to delete.
+
+### New features
+
+Implement new `addCursorAbove` and `addCursorBelow` commands. Bind them to Mod-Alt-ArrowUp/Down in the default keymap.
+
 ## 6.8.1 (2025-03-31)
 
 ### Bug fixes
