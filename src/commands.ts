@@ -611,6 +611,12 @@ export const deleteGroupBackward: StateCommand = target => deleteByGroup(target,
 /// Delete the selection or forward until the end of the next group.
 export const deleteGroupForward: StateCommand = target => deleteByGroup(target, true)
 
+/// Variant of [`deleteGroupForward`](#commands.deleteGroupForward)
+/// that uses the Windows convention of also deleting the whitespace
+/// after a word.
+export const deleteGroupForwardWin: Command = view => deleteBy(view, range =>
+  view.moveByChar(range, true, start => toGroupStart(view, range.head, start)).head)
+
 /// Delete the selection, or, if it is a cursor selection, delete to
 /// the end of the line. If the cursor is directly at the end of the
 /// line, delete the line break after it.
