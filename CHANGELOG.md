@@ -1,3 +1,9 @@
+## 6.10.0 (2025-10-23)
+
+### New features
+
+The new `deleteGroupForwardWin` command provides by-group forward deletion using the Windows convention.
+
 ## 6.9.0 (2025-10-02)
 
 ### Bug fixes
