@@ -1,6 +1,6 @@
-import {EditorView, Command} from "@codemirror/view"
+import {EditorView, Command, Decoration, WidgetType} from "@codemirror/view"
 import {Extension, EditorState} from "@codemirror/state"
-import {cursorSubwordForward, cursorSubwordBackward} from "@codemirror/commands"
+import {cursorSubwordForward, cursorSubwordBackward, cursorLineDown, cursorLineUp} from "@codemirror/commands"
 import ist from "ist"
 import {mkState, stateStr} from "./state.js"
 
@@ -96,5 +96,107 @@ describe("commands", () => {
         testCmd("马在路上|小跑着。", "马在|路上小跑着。", cursorSubwordBackward)
       })
     }
+  })
+
+  let w = new class extends WidgetType {
+    toDOM() { let d = document.createElement("div"); d.style.cssText = "color: blue; height: 4em"; return d }
+  }
+
+  describe("cursorLineDown", () => {
+    it("can move to the next line", () => {
+      testCmd("on|e\ntwo", "one\ntw|o", cursorLineDown)
+    })
+
+    it("can move to a shorter line", () => {
+      testCmd("on|e\nt", "one\nt|", cursorLineDown)
+    })
+
+    it("goes to the end on last line", () => {
+      testCmd("on|e", "one|", cursorLineDown)
+    })
+
+    it("keeps a colum pos across a shorter line", () => {
+      testCmd("on|e\nt\nthree", "one\nt\nth|ree", v => { cursorLineDown(v); cursorLineDown(v); return true })
+    })
+
+    it("can move in a wrapped line", () => {
+      testCmd("da|ndelion dandelion dandelion",
+              "dandelion da|ndelion dandelion",
+              cursorLineDown,
+              [EditorView.theme({"&": {maxWidth: "13ch"}}), EditorView.lineWrapping])
+    })
+
+    it("isn't affected by folded lines", () => {
+      testCmd("on|e two\nthree four\nfive six\nseven eight",
+              "one two\nthree four\nfive six\nse|ven eight",
+              cursorLineDown,
+              EditorView.decorations.of(Decoration.set(Decoration.replace({}).range(5, 26))))
+    })
+
+    it("skips block widgets", () => {
+      testCmd("on|e\ntwo\nthree\nfour",
+              "one\ntwo\nthree\nfo|ur",
+              cursorLineDown,
+              EditorView.decorations.of(Decoration.set(Decoration.replace({widget: w, block: true}).range(4, 13))))
+    })
+
+    it("skips multiple block widgets", () => {
+      testCmd("on|e\ntwo\nthree\nfour",
+              "one\ntwo\nthree\nfo|ur",
+              cursorLineDown,
+              EditorView.decorations.of(Decoration.set([
+                Decoration.replace({widget: w, block: true}).range(4, 7),
+                Decoration.replace({widget: w, block: true}).range(8, 13)
+              ])))
+    })
+  })
+
+  describe("cursorLineUp", () => {
+    it("can move to the previous line", () => {
+      testCmd("one\ntwo|", "one|\ntwo", cursorLineUp)
+    })
+
+    it("can move to a shorter line", () => {
+      testCmd("o\ntwo|", "o|\ntwo", cursorLineUp)
+    })
+
+    it("goes to the start on first line", () => {
+      testCmd("on|e", "|one", cursorLineUp)
+    })
+
+    it("keeps a colum pos across a shorter line", () => {
+      testCmd("one\nt\nthr|ee", "one|\nt\nthree", v => { cursorLineUp(v); cursorLineUp(v); return true })
+    })
+
+    it("can move in a wrapped line", () => {
+      testCmd("dandelion dandel|ion dandelion",
+              "dandel|ion dandelion dandelion",
+              cursorLineUp,
+              [EditorView.theme({"&": {maxWidth: "13ch"}}), EditorView.lineWrapping])
+    })
+
+    it("isn't affected by folded lines", () => {
+      testCmd("one two\nthree four\nfive six\ns|even eight",
+              "o|ne two\nthree four\nfive six\nseven eight",
+              cursorLineUp,
+              EditorView.decorations.of(Decoration.set(Decoration.replace({}).range(5, 26))))
+    })
+
+    it("skips block widgets", () => {
+      testCmd("one\ntwo\nthree\n|four",
+              "|one\ntwo\nthree\nfour",
+              cursorLineUp,
+              EditorView.decorations.of(Decoration.set(Decoration.replace({widget: w, block: true}).range(4, 13))))
+    })
+
+    it("skips multiple block widgets", () => {
+      testCmd("one\ntwo\nthree\nfo|ur",
+              "on|e\ntwo\nthree\nfour",
+              cursorLineUp,
+              EditorView.decorations.of(Decoration.set([
+                Decoration.replace({widget: w, block: true}).range(4, 7),
+                Decoration.replace({widget: w, block: true}).range(8, 13)
+              ])))
+    })
   })
 })
