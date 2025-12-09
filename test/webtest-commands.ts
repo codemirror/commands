@@ -149,6 +149,13 @@ describe("commands", () => {
                 Decoration.replace({widget: w, block: true}).range(8, 13)
               ])))
     })
+
+    it("can escape lines with padding", () => {
+      let attributes = {style: "padding-bottom: 30px 0"}
+      testCmd("a\n|b\nc", "a\nb\n|c",
+              cursorLineDown,
+              EditorView.decorations.of(Decoration.set(Decoration.line({attributes}).range(2))))
+    })
   })
 
   describe("cursorLineUp", () => {
@@ -197,6 +204,13 @@ describe("commands", () => {
                 Decoration.replace({widget: w, block: true}).range(4, 7),
                 Decoration.replace({widget: w, block: true}).range(8, 13)
               ])))
+    })
+
+    it("can escape lines with padding", () => {
+      let attributes = {style: "padding-top: 30px 0"}
+      testCmd("a\nb|\nc", "a|\nb\nc",
+              cursorLineUp,
+              EditorView.decorations.of(Decoration.set(Decoration.line({attributes}).range(2))))
     })
   })
 })
