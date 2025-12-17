@@ -750,14 +750,20 @@ export const moveLineDown: StateCommand = ({state, dispatch}) => moveLine(state,
 
 function copyLine(state: EditorState, dispatch: (tr: Transaction) => void, forward: boolean): boolean {
   if (state.readOnly) return false
-  let changes = []
+  let changes: ChangeSpec[] = []
   for (let block of selectedLineBlocks(state)) {
     if (forward)
       changes.push({from: block.from, insert: state.doc.slice(block.from, block.to) + state.lineBreak})
     else
       changes.push({from: block.to, insert: state.lineBreak + state.doc.slice(block.from, block.to)})
   }
-  dispatch(state.update({changes, scrollIntoView: true, userEvent: "input.copyline"}))
+  let changeSet = state.changes(changes)
+  dispatch(state.update({
+    changes: changeSet,
+    selection: state.selection.map(changeSet, forward ? 1 : -1),
+    scrollIntoView: true,
+    userEvent: "input.copyline"
+  }))
   return true
 }
 
