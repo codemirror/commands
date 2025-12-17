@@ -1,3 +1,9 @@
+## 6.10.1 (2025-12-17)
+
+### Bug fixes
+
+Fix a bug where `copyLineDown` would leave the cursor on the wrong line when it was at the start of the line.
+
 ## 6.10.0 (2025-10-23)
 
 ### New features
