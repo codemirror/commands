@@ -159,12 +159,14 @@ function changeLineComment(
 ): TransactionSpec | null {
   let lines: {line: Line, token: string, comment: number, empty: boolean, indent: number, single: boolean}[] = []
   let prevLine = -1
-  for (let {from, to} of ranges) {
-    let startI = lines.length, minIndent = 1e9
-    let token = getConfig(state, from).line
-    if (!token) continue
+  ranges: for (let {from, to} of ranges) {
+    let startI = lines.length, minIndent = 1e9, token: string | undefined
     for (let pos = from; pos <= to;) {
       let line = state.doc.lineAt(pos)
+      if (token == undefined) {
+        token = getConfig(state, line.from).line
+        if (!token) continue ranges
+      }
       if (line.from > prevLine && (from == to || to > line.from)) {
         prevLine = line.from
         let indent = /^\s*/.exec(line.text)![0].length
