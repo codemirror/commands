@@ -37,6 +37,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/codemirror/commands.git"
+    "url": "git+https://github.com/codemirror/commands.git"
   }
 }
