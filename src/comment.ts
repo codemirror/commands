@@ -1,4 +1,4 @@
-import {Line, EditorState, TransactionSpec, StateCommand} from "@codemirror/state"
+import {Line, EditorState, TransactionSpec, StateCommand, ChangeSpec} from "@codemirror/state"
 
 /// An object of this type can be provided as [language
 /// data](#state.EditorState.languageDataAt) under a `"commentTokens"`
@@ -138,8 +138,8 @@ function changeBlockComment(
       return [{from: range.from, insert: tokens[i].open + " "}, {from: range.to, insert: " " + tokens[i].close}]
     }))}
   } else if (option != CommentOption.Comment && comments.some(c => c)) {
-    let changes = []
-    for (let i = 0, comment; i < comments.length; i++) if (comment = comments[i]) {
+    let changes: {from: number, to: number}[] = []
+    for (let i = 0, comment: BlockComment | null; i < comments.length; i++) if (comment = comments[i]) {
       let token = tokens[i], {open, close} = comment
       changes.push(
         {from: open.pos - token.open.length, to: open.pos + open.margin},
@@ -183,13 +183,13 @@ function changeLineComment(
   }
 
   if (option != CommentOption.Uncomment && lines.some(l => l.comment < 0 && (!l.empty || l.single))) {
-    let changes = []
+    let changes: ChangeSpec[] = []
     for (let {line, token, indent, empty, single} of lines) if (single || !empty)
       changes.push({from: line.from + indent, insert: token + " "})
     let changeSet = state.changes(changes)
     return {changes: changeSet, selection: state.selection.map(changeSet, 1)}
   } else if (option != CommentOption.Comment && lines.some(l => l.comment >= 0)) {
-    let changes = []
+    let changes: ChangeSpec[] = []
     for (let {line, comment, token} of lines) if (comment >= 0) {
       let from = line.from + comment, to = from + token.length
       if (line.text[to - line.from] == " ") to++

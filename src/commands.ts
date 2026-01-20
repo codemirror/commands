@@ -3,7 +3,7 @@ import {EditorState, StateCommand, EditorSelection, SelectionRange,
         findClusterBreak, Text, Line, countColumn, CharCategory} from "@codemirror/state"
 import {EditorView, Command, Direction, KeyBinding} from "@codemirror/view"
 import {syntaxTree, IndentContext, getIndentUnit, indentUnit, indentString,
-        getIndentation, matchBrackets} from "@codemirror/language"
+        getIndentation, matchBrackets, MatchResult} from "@codemirror/language"
 import {SyntaxNode, NodeProp} from "@lezer/common"
 import {toggleComment, toggleBlockComment} from "./comment"
 
@@ -118,7 +118,7 @@ function moveBySubword(view: EditorView, range: SelectionRange, forward: boolean
   let step = (next: string) => {
     if (done) return false
     pos += forward ? next.length : -next.length
-    let nextCat = categorize(next), ahead
+    let nextCat = categorize(next), ahead: string
     if (nextCat == CharCategory.Word && next.charCodeAt(0) < 128 && /[\W_]/.test(next))
       nextCat = -1 as any // Treat word punctuation specially
     if (cat == CharCategory.Space) cat = nextCat
@@ -185,7 +185,7 @@ function moveBySyntax(state: EditorState, start: SelectionRange, forward: boolea
     if (interestingNode(state, next, bracketProp)) pos = next
     else at = forward ? next.to : next.from
   }
-  let bracket = pos.type.prop(bracketProp), match, newPos
+  let bracket = pos.type.prop(bracketProp), match: MatchResult | null, newPos: number
   if (bracket && (match = forward ? matchBrackets(state, pos.from, 1) : matchBrackets(state, pos.to, -1)) && match.matched)
     newPos = forward ? match.end!.to : match.end!.from
   else
@@ -215,7 +215,7 @@ export const cursorLineDown: Command = view => cursorByLine(view, true)
 
 function pageInfo(view: EditorView) {
   let selfScroll = view.scrollDOM.clientHeight < view.scrollDOM.scrollHeight - 2
-  let marginTop = 0, marginBottom = 0, height
+  let marginTop = 0, marginBottom = 0, height: number
   if (selfScroll) {
     for (let source of view.state.facet(EditorView.scrollMargins)) {
       let margins = source(view)
@@ -508,7 +508,7 @@ export const addCursorBelow: Command = view => addCursorVertically(view, true)
 /// reduce it to its main range. Otherwise, if the selection is
 /// non-empty, convert it to a cursor selection.
 export const simplifySelection: StateCommand = ({state, dispatch}) => {
-  let cur = state.selection, selection = null
+  let cur = state.selection, selection: EditorSelection | null = null
   if (cur.ranges.length > 1) selection = EditorSelection.create([cur.main])
   else if (!cur.main.empty) selection = EditorSelection.create([EditorSelection.cursor(cur.main.head)])
   if (!selection) return false
@@ -556,7 +556,7 @@ function skipAtomic(target: CommandTarget, pos: number, forward: boolean) {
 }
 
 const deleteByChar = (target: CommandTarget, forward: boolean, byIndentUnit: boolean) => deleteBy(target, range => {
-  let pos = range.from, {state} = target, line = state.doc.lineAt(pos), before, targetPos: number
+  let pos = range.from, {state} = target, line = state.doc.lineAt(pos), before: string, targetPos: number
   if (byIndentUnit && !forward && pos > line.from && pos < line.from + 200 &&
       !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
     if (before[before.length - 1] == "\t") return pos - 1
@@ -651,7 +651,7 @@ export const deleteLineBoundaryForward: Command = view => deleteBy(view, range =
 /// document.
 export const deleteTrailingWhitespace: StateCommand = ({state, dispatch}) => {
   if (state.readOnly) return false
-  let changes = []
+  let changes: ChangeSpec[] = []
   for (let pos = 0, prev = "", iter = state.doc.iter();;) {
     iter.next()
     if (iter.lineBreak || iter.done) {
@@ -698,7 +698,7 @@ export const transposeChars: StateCommand = ({state, dispatch}) => {
 }
 
 function selectedLineBlocks(state: EditorState) {
-  let blocks = [], upto = -1
+  let blocks: {from: number, to: number, ranges: SelectionRange[]}[] = [], upto = -1
   for (let range of state.selection.ranges) {
     let startLine = state.doc.lineAt(range.from), endLine = state.doc.lineAt(range.to)
     if (!range.empty && range.to == endLine.from) endLine = state.doc.lineAt(range.to - 1)
@@ -716,7 +716,7 @@ function selectedLineBlocks(state: EditorState) {
 
 function moveLine(state: EditorState, dispatch: (tr: Transaction) => void, forward: boolean): boolean {
   if (state.readOnly) return false
-  let changes = [], ranges = []
+  let changes: ChangeSpec[] = [], ranges: SelectionRange[] = []
   for (let block of selectedLineBlocks(state)) {
     if (forward ? block.to == state.doc.length : block.from == 0) continue
     let nextLine = state.doc.lineAt(forward ? block.to + 1 : block.from - 1)
@@ -814,7 +814,7 @@ export const insertNewlineKeepIndent: StateCommand = ({state, dispatch}) => {
 function isBetweenBrackets(state: EditorState, pos: number): {from: number, to: number} | null {
   if (/\(\)|\[\]|\{\}/.test(state.sliceDoc(pos - 1, pos + 1))) return {from: pos, to: pos}
   let context = syntaxTree(state).resolveInner(pos)
-  let before = context.childBefore(pos), after = context.childAfter(pos), closedBy
+  let before = context.childBefore(pos), after = context.childAfter(pos), closedBy: readonly string[] | undefined
   if (before && after && before.to <= pos && after.from >= pos &&
       (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 &&
       state.doc.lineAt(before.to).from == state.doc.lineAt(after.from).from &&
