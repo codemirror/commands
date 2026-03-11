@@ -311,7 +311,9 @@ export const selectMatchingBracket: StateCommand = ({state, dispatch}) => toMatc
 function extendSel(target: CommandTarget, how: (range: SelectionRange) => SelectionRange): boolean {
   let selection = updateSel(target.state.selection, range => {
     let head = how(range)
-    return EditorSelection.range(range.anchor, head.head, head.goalColumn, head.bidiLevel || undefined)
+    return range.anchor == head.head
+      ? EditorSelection.cursor(head.head, head.assoc, head.bidiLevel || undefined, head.goalColumn)
+      : EditorSelection.range(range.anchor, head.head, head.goalColumn, head.bidiLevel || undefined)
   })
   if (selection.eq(target.state.selection)) return false
   target.dispatch(setSel(target.state, selection))
