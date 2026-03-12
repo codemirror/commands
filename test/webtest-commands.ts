@@ -1,6 +1,7 @@
 import {EditorView, Command, Decoration, WidgetType} from "@codemirror/view"
 import {Extension, EditorState} from "@codemirror/state"
-import {cursorSubwordForward, cursorSubwordBackward, cursorLineDown, cursorLineUp} from "@codemirror/commands"
+import {cursorSubwordForward, cursorSubwordBackward, cursorLineDown, cursorLineUp,
+        selectLineDown, selectLineUp} from "@codemirror/commands"
 import ist from "ist"
 import {mkState, stateStr} from "./state.js"
 
@@ -19,6 +20,8 @@ function testCmd(before: string, after: string, command: Command, extensions: Ex
     view.destroy()
   }
 }
+
+const narrow = EditorView.theme({"&": {maxWidth: "13ch"}})
 
 describe("commands", () => {
   describe("cursorSubwordForward", () => {
@@ -120,10 +123,8 @@ describe("commands", () => {
     })
 
     it("can move in a wrapped line", () => {
-      testCmd("da|ndelion dandelion dandelion",
-              "dandelion da|ndelion dandelion",
-              cursorLineDown,
-              [EditorView.theme({"&": {maxWidth: "13ch"}}), EditorView.lineWrapping])
+      testCmd("da|ndelion dandelion dandelion", "dandelion da|ndelion dandelion",
+              cursorLineDown, [narrow, EditorView.lineWrapping])
     })
 
     it("isn't affected by folded lines", () => {
@@ -172,6 +173,18 @@ describe("commands", () => {
               cursorLineDown,
               EditorView.decorations.of(Decoration.set(Decoration.line({attributes}).range(2))))
     })
+
+    it("can move in a wrapped line with large line height", () => {
+      testCmd("da|ndelion dandelion dandelion",
+              "dandelion da|ndelion dandelion",
+              cursorLineDown,
+              [narrow, EditorView.theme({".cm-line": {lineHeight: "3"}}), EditorView.lineWrapping])
+    })
+
+    it("keeps assoc when moving through wrapped text", () => {
+      testCmd("|dandelion dandelion dandelion", "dandelion dandelion |dandelion",
+              v => cursorLineDown(v) && cursorLineDown(v), [narrow, EditorView.lineWrapping])
+    })
   })
 
   describe("cursorLineUp", () => {
@@ -192,10 +205,8 @@ describe("commands", () => {
     })
 
     it("can move in a wrapped line", () => {
-      testCmd("dandelion dandel|ion dandelion",
-              "dandel|ion dandelion dandelion",
-              cursorLineUp,
-              [EditorView.theme({"&": {maxWidth: "13ch"}}), EditorView.lineWrapping])
+      testCmd("dandelion dandel|ion dandelion", "dandel|ion dandelion dandelion",
+              cursorLineUp, [narrow, EditorView.lineWrapping])
     })
 
     it("isn't affected by folded lines", () => {
@@ -227,6 +238,55 @@ describe("commands", () => {
       testCmd("a\nb|\nc", "a|\nb\nc",
               cursorLineUp,
               EditorView.decorations.of(Decoration.set(Decoration.line({attributes}).range(2))))
+    })
+  })
+
+  describe("selectLineDown", () => {
+    it("selects to the next line", () => {
+      testCmd("|one\ntwo\nthree", "<one\n>two\nthree", selectLineDown)
+    })
+
+    it("keeps the horizontal position", () => {
+      testCmd("on|e\ntwo\nthree", "on<e\ntw>o\nthree", selectLineDown)
+    })
+
+    it("keeps a colum pos across a shorter line", () => {
+      testCmd("on|e\nt\nthree", "on<e\nt\nth>ree", v => selectLineDown(v) && selectLineDown(v))
+    })
+
+    it("moves to the end of doc when moving beyond the last line", () => {
+      testCmd("one\nt|wo", "one\nt<wo>", selectLineDown)
+    })
+
+    it("clears goal column when hitting the end of doc", () => {
+      testCmd("one\ntwo\nth|ree", "one\ntwo<\nth>ree", v => selectLineDown(v) && selectLineUp(v))
+    })
+
+    it("preserves assoc in wrapped text", () => {
+      testCmd("|dandelion dandelion dandelion", "<dandelion dandelion >dandelion",
+              v => selectLineDown(v) && selectLineDown(v), [narrow, EditorView.lineWrapping])
+    })
+  })
+
+  describe("selectLineUp", () => {
+    it("selects to the previous line", () => {
+      testCmd("one\ntwo\n|three", "one\n<two\n>three", selectLineUp)
+    })
+
+    it("keeps the horizontal position", () => {
+      testCmd("one\ntwo\nt|hree", "one\nt<wo\nt>hree", selectLineUp)
+    })
+
+    it("keeps a colum pos across a shorter line", () => {
+      testCmd("one\nt\nthr|ee", "one<\nt\nthr>ee", v => selectLineUp(v) && selectLineUp(v))
+    })
+
+    it("moves to the start of doc when moving beyond the first line", () => {
+      testCmd("on|e\ntwo", "<on>e\ntwo", selectLineUp)
+    })
+
+    it("clears goal column when hitting the start of doc", () => {
+      testCmd("on|e\ntwo\nthree", "on<e\n>two\nthree", v => selectLineUp(v) && selectLineDown(v))
     })
   })
 })
