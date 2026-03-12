@@ -1,3 +1,9 @@
+## 6.10.3 (2026-03-12)
+
+### Bug fixes
+
+Make sure selection-extending commands preserve the associativity of the selection head.
+
 ## 6.10.2 (2026-02-06)
 
 ### Bug fixes
