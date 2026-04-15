@@ -1,3 +1,5 @@
+**This repository has moved to https://code.haverbeke.berlin/codemirror/commands**
+
 # @codemirror/commands [![NPM version](https://img.shields.io/npm/v/@codemirror/commands.svg)](https://www.npmjs.org/package/@codemirror/commands)
 
 [ [**WEBSITE**](https://codemirror.net/) | [**DOCS**](https://codemirror.net/docs/ref/#commands) | [**ISSUES**](https://code.haverbeke.berlin/codemirror/dev/issues) | [**FORUM**](https://discuss.codemirror.net/) | [**CHANGELOG**](https://code.haverbeke.berlin/codemirror/commands/src/branch/main/CHANGELOG.md) ]
